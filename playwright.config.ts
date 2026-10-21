@@ -1,17 +1,21 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const PORT = 5199;
+
 export default defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: true,
+  fullyParallel: false,
+  workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173/ai-session-2026-10/',
+    baseURL: `http://localhost:${PORT}/ai-session-2026-10/`,
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173/ai-session-2026-10/',
-    reuseExistingServer: true,
+    command: `npx vite --port ${PORT} --strictPort`,
+    url: `http://localhost:${PORT}/ai-session-2026-10/`,
+    reuseExistingServer: false,
+    env: { VITE_USE_EMULATORS: 'true' },
   },
 });

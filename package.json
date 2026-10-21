@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "e2e": "playwright test",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-ai-session \"vitest run -c vitest.rules.config.ts\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-ai-session \"vitest run -c vitest.rules.config.ts\"",
+    "e2e:emu": "firebase emulators:exec --only auth,firestore --project demo-ai-session \"playwright test\""
   },
   "dependencies": {
     "firebase": "^13.0.0",
