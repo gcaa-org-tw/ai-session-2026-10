@@ -63,6 +63,16 @@ export function parseNotes(text: string): Record<string, string> {
   return notes;
 }
 
+function stripTopFolder(files: Record<string, string>): Record<string, string> {
+  const paths = Object.keys(files);
+  if (paths.length === 0 || !paths.every((p) => p.includes('/'))) return files;
+  const top = paths[0]?.split('/')[0];
+  if (!top || !paths.every((p) => p.startsWith(`${top}/`))) return files;
+  const out: Record<string, string> = {};
+  for (const [p, text] of Object.entries(files)) out[p.slice(top.length + 1)] = text;
+  return out;
+}
+
 export async function parseKit(buffer: ArrayBuffer): Promise<KitDoc> {
   let zip: JSZip;
   try {
@@ -80,5 +90,5 @@ export async function parseKit(buffer: ArrayBuffer): Promise<KitDoc> {
   }
   if (Object.keys(files).length === 0) throw new Error('壓縮檔內沒有任何檔案。');
   if (bytes > MAX_KIT_BYTES) throw new Error('素材包超過 Firestore 單一文件的大小上限，請縮小後再傳。');
-  return { files };
+  return { files: stripTopFolder(files) };
 }

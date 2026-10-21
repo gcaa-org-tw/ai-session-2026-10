@@ -93,3 +93,18 @@ test('presenter notes panel shows the empty state when no notes were uploaded', 
   await expect(page.getByTestId('notes-slot')).toContainText('這張沒有筆記');
   await context.close();
 });
+
+test('presenter next-slide preview of an activity is static and creates no entry', async ({ browser, baseURL }) => {
+  await seedSession(HABITS_SLIDE - 1);
+  const { context, page } = await openAs(browser, baseURL, PRESENTER, '#/presenter');
+  const next = page.getByTestId('presenter-next');
+  await expect(next.locator('[data-slide-id="habits"]')).toBeVisible();
+  await expect(next).toContainText('互動活動');
+  await expect(next.getByRole('button')).toHaveCount(0);
+  await expect(next.getByTestId('save-status')).toHaveCount(0);
+  await expect(page.getByTestId('save-status')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '自動摘要' })).toHaveCount(0);
+  await page.waitForTimeout(1000);
+  expect(await adminListIds('entries/habits/users')).toEqual([]);
+  await context.close();
+});

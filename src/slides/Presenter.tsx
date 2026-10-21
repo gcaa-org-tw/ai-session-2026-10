@@ -149,7 +149,7 @@ function PresenterConsole() {
             <div data-testid="presenter-next">
               <p className="mb-1 text-sm text-slate-500">下一張</p>
               {nextSlide ? (
-                <SlideView slide={nextSlide} index={index + 1} />
+                <SlideView slide={nextSlide} index={index + 1} preview />
               ) : (
                 <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">最後一張</p>
               )}

@@ -7,6 +7,7 @@ import Placeholder from './Placeholder';
 export interface SlideDef {
   id: string;
   section: SectionId;
+  title: string;
   kind: 'content' | 'activity';
   activity?: ActivityId;
   render: () => JSX.Element;
@@ -23,13 +24,14 @@ export const sectionLabels: Record<SectionId, string> = {
 };
 
 function content(id: string, section: SectionId, title: string, body: string): SlideDef {
-  return { id, section, kind: 'content', render: () => createElement(Placeholder, { title, body }) };
+  return { id, section, title, kind: 'content', render: () => createElement(Placeholder, { title, body }) };
 }
 
 function activity(id: string, section: SectionId, activityId: ActivityId, title: string): SlideDef {
   return {
     id,
     section,
+    title,
     kind: 'activity',
     activity: activityId,
     render: () => createElement(Placeholder, { title, body: '互動活動即將開放。' }),
@@ -37,7 +39,7 @@ function activity(id: string, section: SectionId, activityId: ActivityId, title:
 }
 
 function habitsActivity(id: string, section: SectionId): SlideDef {
-  return { id, section, kind: 'activity', activity: 'habits', render: () => createElement(PlaceholderActivity) };
+  return { id, section, title: '日常習慣整理', kind: 'activity', activity: 'habits', render: () => createElement(PlaceholderActivity) };
 }
 
 export const slides: SlideDef[] = [

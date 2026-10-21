@@ -53,6 +53,29 @@ describe('parseKit', () => {
       files: { '.agents/skills/fact-check/SKILL.md': '查核', '六都簽署名單.csv': 'a,b' },
     });
   });
+  it('strips a single top-level folder, ignoring macOS junk', async () => {
+    const buf = await zipOf((z) => {
+      z.file('kit/AGENTS.md', 'a');
+      z.file('kit/.agents/skills/x/SKILL.md', 'b');
+      z.file('__MACOSX/kit/._AGENTS.md', 'junk');
+      z.file('kit/.DS_Store', 'junk');
+    });
+    expect(await parseKit(buf)).toEqual({ files: { 'AGENTS.md': 'a', '.agents/skills/x/SKILL.md': 'b' } });
+  });
+  it('strips nothing when the top level holds more than one folder', async () => {
+    const buf = await zipOf((z) => {
+      z.file('kit/AGENTS.md', 'a');
+      z.file('data/list.csv', 'b');
+    });
+    expect(await parseKit(buf)).toEqual({ files: { 'kit/AGENTS.md': 'a', 'data/list.csv': 'b' } });
+  });
+  it('strips nothing when a file sits at the top level next to a folder', async () => {
+    const buf = await zipOf((z) => {
+      z.file('AGENTS.md', 'a');
+      z.file('kit/x.md', 'b');
+    });
+    expect(await parseKit(buf)).toEqual({ files: { 'AGENTS.md': 'a', 'kit/x.md': 'b' } });
+  });
   it('rejects non-zip, empty zip and oversized kits', async () => {
     await expect(parseKit(new TextEncoder().encode('nope').buffer)).rejects.toThrow('zip');
     await expect(parseKit(await zipOf(() => undefined))).rejects.toThrow('沒有任何檔案');
