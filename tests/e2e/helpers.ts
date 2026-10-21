@@ -65,7 +65,7 @@ export async function adminListIds(collectionPath: string): Promise<string[]> {
   return (body.documents ?? []).map((d) => d.name.split('/').pop() ?? '');
 }
 
-export const SLIDE = { warmup: 1, habits: 3, concepts: 5, flowchart: 7, wishlist: 11, scenario: 18 } as const;
+export const SLIDE = { warmup: 1, habits: 3, concepts: 5, flowchart: 7, wishlist: 11, race: 15, raceBoard: 16, scenario: 18 } as const;
 
 export async function seedSession(slideIndex: number, revealed: string[] = []): Promise<void> {
   const res = await fetch(`${FS_BASE}/session/live`, {
@@ -91,4 +91,49 @@ export async function seedNotes(notes: Record<string, string>): Promise<void> {
     body: JSON.stringify({ fields }),
   });
   await expectOk(res, 'seed notes');
+}
+
+function encode(v: unknown): FsValue {
+  if (typeof v === 'string') return { stringValue: v };
+  if (typeof v === 'number') return { integerValue: String(v) };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(encode) } };
+  const fields: Record<string, FsValue> = {};
+  for (const [k, f] of Object.entries(v as Record<string, unknown>)) fields[k] = encode(f);
+  return { mapValue: { fields } };
+}
+
+export async function seedDoc(path: string, data: Record<string, unknown>): Promise<void> {
+  const fields: Record<string, FsValue> = {};
+  for (const [k, v] of Object.entries(data)) fields[k] = encode(v);
+  const res = await fetch(`${FS_BASE}/${path}`, { method: 'PATCH', headers: ADMIN, body: JSON.stringify({ fields }) });
+  await expectOk(res, `seed ${path}`);
+}
+
+export const RELEASE = {
+  title: '模擬稿，內容含虛構資訊｜測試新聞稿',
+  sentences: [
+    { id: 's1', text: '第一句是正確的。' },
+    { id: 's2', text: '第二句有數字錯誤。' },
+    { id: 's3', text: '第三句也是正確的。' },
+    { id: 's4', text: '第四句沒有來源。' },
+    { id: 's5', text: '第五句是正確的。' },
+  ],
+};
+
+export const ANSWER_KEY = {
+  s2: { verdict: 'mismatch', explanation: '名單顯示是23位，不是25位。' },
+  s4: { verdict: 'nosource', explanation: '練習包裡沒有可佐證的資料。' },
+};
+
+export const KIT_FILES = {
+  'AGENTS.md': '# 規則\n',
+  '.agents/skills/fact-check/SKILL.md': '---\nname: fact-check\n---\n查核',
+  '六都簽署名單.csv': '縣市,簽署\n台北,是\n',
+};
+
+export async function seedRaceContent(): Promise<void> {
+  await seedDoc('private/mockRelease', RELEASE);
+  await seedDoc('private/answerKey', ANSWER_KEY);
+  await seedDoc('private/kit', { files: KIT_FILES });
 }

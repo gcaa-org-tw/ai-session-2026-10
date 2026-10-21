@@ -4,6 +4,8 @@ import Flowchart from '../activities/Flowchart';
 import FlipCards from '../activities/FlipCards';
 import Habits from '../activities/Habits';
 import PendingActivity from '../activities/PendingActivity';
+import Race from '../activities/Race';
+import RaceBoard from '../activities/RaceBoard';
 import Scenario from '../activities/Scenario';
 import type { ActivityComponent } from '../activities/types';
 import Warmup from '../activities/Warmup';
@@ -67,8 +69,8 @@ export const slides: SlideDef[] = [
   content('setup-check', 5),
   content('folder-rules', 5),
   content('race-intro', 5),
-  activity('race', 5, PendingActivity, 'race'),
-  activity('race-board', 5, PendingActivity, 'race'),
+  activity('race', 5, Race, 'race'),
+  activity('race-board', 5, RaceBoard, 'race'),
   content('own-case', 5),
   activity('scenario', 6, Scenario, 'scenario'),
   activity('liudu', 6, PendingActivity),

@@ -4,6 +4,7 @@ import { getFirebase } from './firebase';
 declare global {
   interface Window {
     __e2eSignIn?: (email: string) => Promise<void>;
+    __e2eIdToken?: () => Promise<string>;
   }
 }
 
@@ -13,4 +14,10 @@ window.__e2eSignIn = async (email: string) => {
     JSON.stringify({ sub: email, email, email_verified: true }),
   );
   await signInWithCredential(auth, credential);
+};
+
+window.__e2eIdToken = async () => {
+  const user = getFirebase().auth.currentUser;
+  if (!user) throw new Error('not signed in');
+  return user.getIdToken();
 };

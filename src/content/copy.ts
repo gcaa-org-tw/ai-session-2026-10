@@ -80,6 +80,22 @@ export interface StateLabels {
   reload: string;
 }
 
+export interface RaceLabels {
+  roleLabel: string;
+  pairCodeLabel: string;
+  pairCodeHint: string;
+  tapHint: string;
+  downloadKit: string;
+  submittedCount: string;
+  waitingReveal: string;
+  caught: string;
+  missed: string;
+  falseAlarms: string;
+  averagePerEntry: string;
+  perSentence: string;
+  explanation: string;
+}
+
 export interface Copy {
   slides: Record<SlideId, SlideCopy>;
   workTypes: WorkType[];
@@ -98,6 +114,7 @@ export interface Copy {
   roles: Record<'human' | 'agent', string>;
   states: StateLabels;
   sections: Record<SectionId, string>;
+  race: RaceLabels;
 }
 
 export const copy: Copy = {
@@ -551,5 +568,20 @@ export const copy: Copy = {
     4: '願望清單',
     5: '動手做',
     6: '收尾',
+  },
+  race: {
+    roleLabel: '你這組負責',
+    pairCodeLabel: '組別代碼',
+    pairCodeHint: '和同組的人填一樣的代碼',
+    tapHint: '點一句話，選擇判定',
+    downloadKit: '下載練習包',
+    submittedCount: '已送出',
+    waitingReveal: '等待主持人揭曉',
+    caught: '抓到',
+    missed: '漏掉',
+    falseAlarms: '誤判',
+    averagePerEntry: '每份平均',
+    perSentence: '各句被抓到的份數',
+    explanation: '說明',
   },
 };
