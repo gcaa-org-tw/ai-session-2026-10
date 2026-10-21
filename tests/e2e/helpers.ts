@@ -27,3 +27,66 @@ export async function openAs(browser: Browser, baseURL: string | undefined, emai
   await page.evaluate((e) => (window as unknown as { __e2eSignIn: (email: string) => Promise<void> }).__e2eSignIn(e), email);
   return { context, page };
 }
+
+const FS_BASE = `http://127.0.0.1:8080/v1/projects/${PROJECT}/databases/(default)/documents`;
+const ADMIN = { Authorization: 'Bearer owner', 'Content-Type': 'application/json' };
+
+type FsValue =
+  | { stringValue: string }
+  | { integerValue: string }
+  | { booleanValue: boolean }
+  | { nullValue: null }
+  | { mapValue: { fields?: Record<string, FsValue> } }
+  | { arrayValue: { values?: FsValue[] } };
+
+function decode(v: FsValue): unknown {
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('nullValue' in v) return null;
+  if ('arrayValue' in v) return (v.arrayValue.values ?? []).map(decode);
+  const out: Record<string, unknown> = {};
+  for (const [k, f] of Object.entries(v.mapValue.fields ?? {})) out[k] = decode(f);
+  return out;
+}
+
+export async function adminGetDoc(path: string): Promise<Record<string, unknown> | null> {
+  const res = await fetch(`${FS_BASE}/${path}`, { headers: ADMIN });
+  if (res.status === 404) return null;
+  await expectOk(res, `read ${path}`);
+  const body = (await res.json()) as { fields?: Record<string, FsValue> };
+  return decode({ mapValue: { fields: body.fields } }) as Record<string, unknown>;
+}
+
+export async function adminListIds(collectionPath: string): Promise<string[]> {
+  const res = await fetch(`${FS_BASE}/${collectionPath}`, { headers: ADMIN });
+  await expectOk(res, `list ${collectionPath}`);
+  const body = (await res.json()) as { documents?: { name: string }[] };
+  return (body.documents ?? []).map((d) => d.name.split('/').pop() ?? '');
+}
+
+export async function seedSession(slideIndex: number): Promise<void> {
+  const res = await fetch(`${FS_BASE}/session/live`, {
+    method: 'PATCH',
+    headers: ADMIN,
+    body: JSON.stringify({
+      fields: {
+        slideIndex: { integerValue: String(slideIndex) },
+        openActivity: { nullValue: null },
+        revealed: { mapValue: { fields: {} } },
+      },
+    }),
+  });
+  await expectOk(res, 'seed session');
+}
+
+export async function seedNotes(notes: Record<string, string>): Promise<void> {
+  const fields: Record<string, FsValue> = {};
+  for (const [k, v] of Object.entries(notes)) fields[k] = { stringValue: v };
+  const res = await fetch(`${FS_BASE}/private/notes`, {
+    method: 'PATCH',
+    headers: ADMIN,
+    body: JSON.stringify({ fields }),
+  });
+  await expectOk(res, 'seed notes');
+}

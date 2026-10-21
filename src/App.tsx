@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AuthGate from './auth/AuthGate';
+import Upload from './pages/Upload';
 import Follower from './slides/Follower';
 import Presenter from './slides/Presenter';
 
@@ -22,6 +23,9 @@ export default function App() {
   }
   if (route === '/presenter') {
     return <AuthGate>{(auth) => <Presenter presenter={auth.presenter} />}</AuthGate>;
+  }
+  if (route === '/upload') {
+    return <AuthGate>{(auth) => <Upload presenter={auth.presenter} />}</AuthGate>;
   }
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">

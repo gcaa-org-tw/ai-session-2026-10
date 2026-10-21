@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { clampSlide } from '../lib/slideNav';
+import { usePrivateDoc } from '../private/usePrivateDoc';
 import { ensureLiveSession, setSlide, useLiveSession } from '../session/useLiveSession';
 import SlideView from './SlideView';
 import { sectionLabels, slides } from './slides';
@@ -13,6 +15,32 @@ const navButton =
 
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+function NotesPanel({ slideId }: { slideId: string }) {
+  const { data, loading, error } = usePrivateDoc<Record<string, string>>('notes');
+  const note = data?.[slideId];
+
+  let body: ReactNode;
+  if (error) {
+    body = (
+      <p role="alert" className="break-words text-red-700">
+        無法讀取備忘稿：{error}
+      </p>
+    );
+  } else if (loading) {
+    body = <p className="text-slate-500">備忘稿載入中…</p>;
+  } else if (!note) {
+    body = <p className="text-slate-500">這張沒有筆記</p>;
+  } else {
+    body = <p className="whitespace-pre-wrap text-slate-800">{note}</p>;
+  }
+
+  return (
+    <aside data-testid="notes-slot" className="min-h-32 rounded-xl border border-slate-300 bg-white p-4">
+      {body}
+    </aside>
+  );
 }
 
 export default function Presenter({ presenter }: PresenterProps) {
@@ -126,9 +154,7 @@ function PresenterConsole() {
                 <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">最後一張</p>
               )}
             </div>
-            <aside data-testid="notes-slot" className="min-h-32 rounded-xl border border-dashed border-slate-300 p-4 text-slate-500">
-              備忘稿尚未載入
-            </aside>
+            <NotesPanel slideId={slide.id} />
           </div>
         </div>
 
