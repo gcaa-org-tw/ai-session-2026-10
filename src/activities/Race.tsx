@@ -1,87 +1,35 @@
 import { useMemo, useState } from 'react';
-import JSZip from 'jszip';
 import { describeError } from '../auth/useAuth';
 import { copy } from '../content/copy';
 import { ui } from '../content/ui';
 import { useAllEntries, useMyEntry } from '../entries/useEntries';
 import { aggregateRace } from '../lib/scoring';
-import type { KitDoc } from '../lib/privateFiles';
 import type { AnswerKey, MockRelease, RaceEntry, Role, Verdict } from '../lib/types';
 import { usePrivateDoc } from '../private/usePrivateDoc';
 import { setRevealed, useLiveSession } from '../session/useLiveSession';
 import { publishRaceResults } from './raceHooks';
 import { useDraft } from './hooks';
+import KitDownload from './KitDownload';
 import type { ActivityProps } from './types';
 import { buttonBase, LoadFailure, LoadingBlock, primaryButton, SaveStatus, wrapText } from './ui';
 
-const EMPTY: RaceEntry = { role: 'human', pairCode: '', findings: {} };
+const EMPTY: RaceEntry = { role: null, pairCode: '', findings: {} };
 const ROLES: Role[] = ['human', 'agent'];
 const VERDICTS: Verdict[] = ['match', 'mismatch', 'nosource'];
-const KIT_URL_LIFETIME_MS = 60_000;
 
 function isFlag(verdict: Verdict | undefined): boolean {
   return verdict === 'mismatch' || verdict === 'nosource';
-}
-
-async function downloadKit(files: Record<string, string>): Promise<void> {
-  const zip = new JSZip();
-  for (const [path, text] of Object.entries(files)) zip.file(path, text);
-  const blob = await zip.generateAsync({ type: 'blob' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = ui.kitFileName;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), KIT_URL_LIFETIME_MS);
-}
-
-function KitDownload() {
-  const kit = usePrivateDoc<KitDoc>('kit');
-  const [building, setBuilding] = useState(false);
-  const [buildError, setBuildError] = useState<string | null>(null);
-  const files = kit.data?.files ?? null;
-
-  let problem = kit.error ?? buildError;
-  if (!problem && !kit.loading && !files) problem = ui.kitMissing;
-
-  async function build() {
-    if (!files) return;
-    setBuilding(true);
-    setBuildError(null);
-    try {
-      await downloadKit(files);
-    } catch (err) {
-      setBuildError(describeError(err));
-    } finally {
-      setBuilding(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col items-start gap-2">
-      <button type="button" className={primaryButton} disabled={building || kit.loading || !files} onClick={() => void build()}>
-        {copy.race.downloadKit}
-      </button>
-      {(kit.loading || building) && <LoadingBlock />}
-      {problem && (
-        <p role="alert" data-testid="kit-error" className={`text-sm text-red-700 ${wrapText}`}>
-          {copy.race.downloadKit}：{problem}
-        </p>
-      )}
-    </div>
-  );
 }
 
 interface SentenceListProps {
   release: MockRelease;
   entry: RaceEntry;
   busy: boolean;
+  locked: boolean;
   onJudge: (sentenceId: string, verdict: Verdict) => void;
 }
 
-function SentenceList({ release, entry, busy, onJudge }: SentenceListProps) {
+function SentenceList({ release, entry, busy, locked, onJudge }: SentenceListProps) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
@@ -105,14 +53,15 @@ function SentenceList({ release, entry, busy, onJudge }: SentenceListProps) {
               <button
                 type="button"
                 aria-expanded={open}
-                className={`min-w-0 flex-1 text-left text-base ${wrapText}`}
+                disabled={locked}
+                className={`min-w-0 flex-1 text-left text-base disabled:cursor-not-allowed ${wrapText}`}
                 onClick={() => setOpenId(open ? null : sentence.id)}
               >
                 {sentence.text}
               </button>
               {verdict && <span className="shrink-0 text-sm font-semibold text-slate-700">{copy.verdicts[verdict]}</span>}
             </div>
-            {open && (
+            {open && !locked && (
               <div className="grid grid-cols-3 gap-2">
                 {VERDICTS.map((v) => (
                   <button
@@ -207,8 +156,10 @@ export default function Race({ isPresenter }: ActivityProps) {
   if (status === 'loading' || release.loading) return <LoadingBlock />;
   if (release.error) return <LoadFailure message={release.error} />;
   if (!release.data || release.data.sentences.length === 0) return <LoadFailure message={ui.releaseMissing} />;
+  if (session.loading) return <LoadingBlock />;
 
   const current = draft.value;
+  const locked = current.role === null;
   const revealed = session.state?.revealed.race === true;
 
   function judge(sentenceId: string, verdict: Verdict) {
@@ -235,6 +186,11 @@ export default function Race({ isPresenter }: ActivityProps) {
             </button>
           ))}
         </div>
+        {locked && (
+          <p role="status" data-testid="race-pick-role" className={`text-amber-800 ${wrapText}`}>
+            {copy.race.pickRoleFirst}
+          </p>
+        )}
       </div>
       <label className="flex flex-col gap-1">
         <span className="font-semibold">{copy.race.pairCodeLabel}</span>
@@ -251,7 +207,7 @@ export default function Race({ isPresenter }: ActivityProps) {
       <h3 className={`text-lg font-bold ${wrapText}`}>{release.data.title}</h3>
       <p className="text-slate-600">{copy.race.tapHint}</p>
       <SaveStatus status={status} failed={failed} error={error} hasValue={value !== null} onRetry={() => void retry()} />
-      <SentenceList release={release.data} entry={current} busy={busy} onJudge={judge} />
+      <SentenceList release={release.data} entry={current} busy={busy} locked={locked} onJudge={judge} />
     </div>
   );
 }

@@ -22,7 +22,7 @@ describe('slides', () => {
     expect(new Set(slides.map((s) => s.id)).size).toBe(slides.length);
   });
   test('activity slides with shared state name their activity', () => {
-    const stateless = ['concepts', 'flowchart', 'liudu'];
+    const stateless = ['concepts', 'flowchart', 'folder-rules', 'liudu'];
     for (const s of slides) {
       if (s.kind !== 'activity') continue;
       if (stateless.includes(s.id)) expect(s.activity).toBeUndefined();

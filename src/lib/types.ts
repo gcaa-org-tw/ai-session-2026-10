@@ -13,7 +13,7 @@ export interface WishItem { text: string; repeats: boolean; rulesWritable: boole
 export interface WishEntry { items: WishItem[] }
 export interface ScenarioEntry { what: string; files: string; gain: string; optInName: boolean }
 export interface Owned<T> { uid: string; value: T }
-export interface RaceEntry { role: Role; pairCode: string; findings: Record<string, Verdict> }
+export interface RaceEntry { role: Role | null; pairCode: string; findings: Record<string, Verdict> }
 export interface MockRelease { title: string; sentences: { id: string; text: string }[] }
 export type AnswerKey = Record<string, { verdict: Exclude<Verdict, 'match'>; explanation: string }>;
 export interface RoleScore { entries: number; caughtAvg: number; missedAvg: number; falseAlarmsAvg: number; perSentence: Record<string, number> }

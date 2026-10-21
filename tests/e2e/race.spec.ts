@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import JSZip from 'jszip';
+import { copy } from '../../src/content/copy';
 import { readFile } from 'node:fs/promises';
 import {
   adminGetDoc,
@@ -35,10 +36,14 @@ async function judge(page: Page, id: string, verdict: string) {
   await expect(page.getByTestId('save-status')).toHaveText('已儲存');
 }
 
-async function enter(page: Page, role: string, code: string, verdicts: Record<string, string>) {
-  await expect(sentence(page, 's1')).toBeVisible();
+async function pickRole(page: Page, role: string) {
   await page.getByRole('button', { name: role, exact: true }).click();
   await expect(page.getByTestId('save-status')).toHaveText('已儲存');
+}
+
+async function enter(page: Page, role: string, code: string, verdicts: Record<string, string>) {
+  await expect(sentence(page, 's1')).toBeVisible();
+  await pickRole(page, role);
   await page.getByLabel('組別代碼').fill(code);
   await expect(page.getByTestId('save-status')).toHaveText('已儲存');
   for (const [id, verdict] of Object.entries(verdicts)) await judge(page, id, verdict);
@@ -67,6 +72,7 @@ test('follower never requests the answer key; presenter does', async ({ browser,
   follower.page.on('request', (r) => bodies.follower?.push(r.url() + (r.postData() ?? '')));
   await follower.page.reload();
   await expect(sentence(follower.page, 's1')).toBeVisible();
+  await pickRole(follower.page, '人工查核');
   await judge(follower.page, 's2', '不符');
   const presenter = await openAs(browser, baseURL, PRESENTER, '#/presenter');
   presenter.page.on('request', (r) => bodies.presenter?.push(r.url() + (r.postData() ?? '')));
@@ -174,15 +180,57 @@ test('offline save shows 儲存失敗, retry saves once', async ({ browser, base
   await seedSession(SLIDE.race);
   const a = await openAs(browser, baseURL, ALICE, '#/');
   await expect(sentence(a.page, 's1')).toBeVisible();
+  await pickRole(a.page, '人工查核');
   await a.context.setOffline(true);
   await sentence(a.page, 's2').getByRole('button').first().click();
   await sentence(a.page, 's2').getByRole('button', { name: '不符', exact: true }).click();
   await expect(a.page.getByTestId('save-status')).toHaveText('儲存失敗', { timeout: 15000 });
-  await a.context.setOffline(false);
   await a.page.getByRole('button', { name: '再試一次' }).click();
-  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
+  await expect(a.page.getByTestId('save-status')).toHaveText('儲存中');
+  await a.context.setOffline(false);
+  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存', { timeout: 30000 });
   expect(await adminListIds('entries/race/users')).toHaveLength(1);
   await a.context.close();
+});
+
+test('without a role the race asks for one and does not open the verdict choice', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.race);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  await expect(sentence(a.page, 's2')).toBeVisible();
+  await expect(a.page.getByTestId('race-pick-role')).toHaveText(copy.race.pickRoleFirst);
+  const tap = sentence(a.page, 's2').getByRole('button').first();
+  await expect(tap).toBeDisabled();
+  await tap.click({ force: true });
+  await expect(sentence(a.page, 's2').getByRole('button', { name: '不符', exact: true })).toHaveCount(0);
+  await a.page.getByLabel('組別代碼').fill('Z9');
+  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
+  await expect(a.page.getByTestId('race-pick-role')).toBeVisible();
+  await expect(tap).toBeDisabled();
+
+  await pickRole(a.page, '代理查核');
+  await expect(a.page.getByTestId('race-pick-role')).toHaveCount(0);
+  await expect(tap).toBeEnabled();
+  await tap.click();
+  await expect(sentence(a.page, 's2').getByRole('button', { name: '不符', exact: true })).toBeVisible();
+  await a.context.close();
+});
+
+test('an entry without a role is not counted for either role', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.race);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  await expect(sentence(a.page, 's1')).toBeVisible();
+  await a.page.getByLabel('組別代碼').fill('Z9');
+  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
+  expect(await adminListIds('entries/race/users')).toHaveLength(1);
+  const presenter = await openAs(browser, baseURL, PRESENTER, '#/presenter');
+  const current = presenter.page.getByTestId('presenter-current');
+  await expect(current.getByTestId('race-count-human')).toContainText('0');
+  await expect(current.getByTestId('race-count-agent')).toContainText('0');
+  await current.getByRole('button', { name: '揭曉' }).click();
+  await expect(current.getByRole('button', { name: '揭曉' })).toHaveCount(0);
+  expect(await adminGetDoc('public/raceResults')).toMatchObject({ human: { entries: 0 }, agent: { entries: 0 } });
+  await a.context.close();
+  await presenter.context.close();
 });
 
 test('kit download builds 練習包.zip from the stored kit', async ({ browser, baseURL }) => {
@@ -201,6 +249,38 @@ test('kit download builds 練習包.zip from the stored kit', async ({ browser, 
   expect(await zip.file('AGENTS.md')?.async('string')).toBe(KIT_FILES['AGENTS.md']);
   await expect(button).toBeEnabled();
   await a.context.close();
+});
+
+test('the folder-rules slide offers the same kit download', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.folderRules);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  await expect(a.page.locator('[data-slide-id="folder-rules"]')).toBeVisible();
+  const button = a.page.getByRole('button', { name: '下載練習包' });
+  await expect(button).toBeEnabled();
+  const [download] = await Promise.all([a.page.waitForEvent('download'), button.click()]);
+  expect(download.suggestedFilename()).toBe('練習包.zip');
+  const zip = await JSZip.loadAsync(await readFile(await download.path()));
+  expect(Object.keys(zip.files).filter((n) => !zip.files[n]?.dir).sort()).toEqual(Object.keys(KIT_FILES).sort());
+  expect(await adminListIds('entries/race/users')).toHaveLength(0);
+  await a.context.close();
+});
+
+test('the folder-rules slide shows the missing-kit error and a disabled button', async ({ browser, baseURL }) => {
+  await resetEmulators();
+  await seedSession(SLIDE.folderRules);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  await expect(a.page.getByRole('button', { name: '下載練習包' })).toBeDisabled();
+  await expect(a.page.getByTestId('kit-error')).toBeVisible();
+  await a.context.close();
+});
+
+test('presenter preview of the folder-rules slide does not mount the download', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.folderRules - 1);
+  const presenter = await openAs(browser, baseURL, PRESENTER, '#/presenter');
+  const next = presenter.page.getByTestId('presenter-next');
+  await expect(next.locator('[data-slide-id="folder-rules"]')).toBeVisible();
+  await expect(next.getByRole('button', { name: '下載練習包' })).toHaveCount(0);
+  await presenter.context.close();
 });
 
 test('missing kit disables the download and shows the error', async ({ browser, baseURL }) => {
@@ -244,6 +324,7 @@ for (const name of ['race', 'raceBoard'] as const) {
     await a.page.setViewportSize({ width: 640, height: 800 });
     if (name === 'race') {
       await expect(sentence(a.page, 's2')).toBeVisible();
+      await pickRole(a.page, '人工查核');
       await a.page.getByLabel('組別代碼').fill(LONG);
       await judge(a.page, 's2', '不符');
       await sentence(a.page, 's2').getByRole('button').first().click();

@@ -50,8 +50,9 @@ test('shows 儲存失敗 offline, retry succeeds online, and no duplicate appear
   const retry = page.getByRole('button', { name: '再試一次' });
   await expect(retry).toBeVisible();
 
-  await context.setOffline(false);
   await retry.click();
+  await expect(page.getByTestId('save-status')).toHaveText('儲存中');
+  await context.setOffline(false);
   await expect(page.getByTestId('save-status')).toHaveText('已儲存', { timeout: 30000 });
 
   const ids = await adminListIds('entries/habits/users');

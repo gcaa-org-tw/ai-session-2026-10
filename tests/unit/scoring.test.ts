@@ -68,6 +68,23 @@ describe('aggregateRace', () => {
   });
 });
 
+describe('aggregateRace with unselected roles', () => {
+  const unselected: RaceEntry = { role: null, pairCode: 'A1', findings: { s2: 'mismatch', s3: 'mismatch' } };
+
+  test('an entry without a role is counted in neither role', () => {
+    const results = aggregateRace([unselected], key);
+    expect(results.human.entries).toBe(0);
+    expect(results.agent.entries).toBe(0);
+    expect(results.human.perSentence).toEqual({ s2: 0, s5: 0 });
+    expect(results.agent.perSentence).toEqual({ s2: 0, s5: 0 });
+  });
+  test('it does not change the averages of entries that have a role', () => {
+    const human: RaceEntry = { role: 'human', pairCode: 'A1', findings: { s2: 'mismatch' } };
+    const withExtra = aggregateRace([human, unselected], key);
+    expect(withExtra).toEqual(aggregateRace([human], key));
+  });
+});
+
 describe('aggregateHabits', () => {
   const entries: HabitsEntry[] = [
     { placements: { c1: 'outdated', c2: 'useful' } },

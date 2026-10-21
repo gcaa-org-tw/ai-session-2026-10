@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import Flowchart from '../activities/Flowchart';
 import FlipCards from '../activities/FlipCards';
 import Habits from '../activities/Habits';
+import KitDownload from '../activities/KitDownload';
 import LiuduCompare from '../activities/LiuduCompare';
 import Race from '../activities/Race';
 import RaceBoard from '../activities/RaceBoard';
@@ -88,7 +89,7 @@ export const slides: SlideDef[] = [
   contentWith('workflows', 3, WorkflowsTable),
   activity('wishlist', 4, Wishlist, 'wishlist'),
   content('setup-check', 5),
-  content('folder-rules', 5),
+  activity('folder-rules', 5, KitDownload),
   content('race-intro', 5),
   activity('race', 5, Race, 'race'),
   activity('race-board', 5, RaceBoard, 'race'),
