@@ -1,4 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { copy } from '../../src/content/copy';
+
+const DECK_STEP = copy.setup.steps.findIndex((step) => step.extra === 'deck');
+const MEET_STEP = copy.setup.steps.findIndex((step) => step.extra === 'meet');
 
 test('setup page renders without sign-in and without Firestore traffic', async ({ page }) => {
   const backendRequests: string[] = [];
@@ -30,16 +34,18 @@ test('urls in step bodies become safe links', async ({ page }) => {
 });
 
 test('deck link sits under the open-deck step', async ({ page }) => {
+  expect(DECK_STEP).toBeGreaterThanOrEqual(0);
   await page.goto('#/setup');
-  const link = page.getByTestId('setup-step-3').locator('a[href="https://gcaa-org-tw.github.io/ai-session-2026-10/"]');
+  const link = page.getByTestId(`setup-step-${DECK_STEP}`).locator('a[href="https://gcaa-org-tw.github.io/ai-session-2026-10/"]');
   await expect(link).toHaveCount(1);
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 });
 
 test('meet step shows the pending text while the link is empty', async ({ page }) => {
+  expect(MEET_STEP).toBeGreaterThanOrEqual(0);
   await page.goto('#/setup');
-  const step = page.getByTestId('setup-step-4');
+  const step = page.getByTestId(`setup-step-${MEET_STEP}`);
   await expect(step).toContainText('會議連結會另外通知。');
   await expect(step.locator('a')).toHaveCount(0);
 });

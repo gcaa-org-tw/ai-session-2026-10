@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AuthGate from './auth/AuthGate';
 import Setup from './pages/Setup';
+import Tools from './pages/Tools';
 import Upload from './pages/Upload';
 import Follower from './slides/Follower';
 import Presenter from './slides/Presenter';
@@ -21,6 +22,9 @@ export default function App() {
 
   if (route === '/setup') {
     return <Setup />;
+  }
+  if (route === '/tools') {
+    return <Tools />;
   }
   if (route === '/') {
     return <AuthGate>{() => <Follower />}</AuthGate>;

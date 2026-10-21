@@ -1,18 +1,10 @@
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
 import { copy } from '../content/copy';
+import type { SetupStep } from '../content/copy';
+import ExternalLink from './ExternalLink';
 
-const DECK_STEP = 3;
-const MEET_STEP = 4;
 const URL_PATTERN = /(https:\/\/[A-Za-z0-9\-._~:/?#@!$&*+=%]*[A-Za-z0-9\-_~/#=%])/g;
-
-function ExternalLink({ href }: { href: string }) {
-  return (
-    <a className="break-all text-emerald-700 underline" href={href} target="_blank" rel="noopener noreferrer">
-      {href}
-    </a>
-  );
-}
 
 function linkify(text: string): ReactNode {
   return text.split(URL_PATTERN).map((part, index) =>
@@ -20,16 +12,16 @@ function linkify(text: string): ReactNode {
   );
 }
 
-function StepExtra({ index }: { index: number }) {
+function StepExtra({ extra }: { extra: SetupStep['extra'] }) {
   const { deckUrl, meetUrl, meetPending } = copy.setup;
-  if (index === DECK_STEP) {
+  if (extra === 'deck') {
     return (
       <p className="text-base leading-relaxed text-slate-700" data-testid="setup-deck-link">
         <ExternalLink href={deckUrl} />
       </p>
     );
   }
-  if (index === MEET_STEP) {
+  if (extra === 'meet') {
     return (
       <p className="text-base leading-relaxed text-slate-700" data-testid="setup-meet">
         {meetUrl === '' ? meetPending : <ExternalLink href={meetUrl} />}
@@ -58,7 +50,7 @@ export default function Setup() {
                     {linkify(paragraph)}
                   </p>
                 ))}
-                <StepExtra index={index} />
+                <StepExtra extra={step.extra} />
               </div>
             </li>
           ))}

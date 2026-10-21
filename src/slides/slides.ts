@@ -14,6 +14,7 @@ import { copy } from '../content/copy';
 import type { SlideId } from '../content/copy';
 import type { ActivityId, SectionId } from '../lib/types';
 import SlideText from './SlideText';
+import ToolsLink from './ToolsLink';
 import WorkflowsTable from './WorkflowsTable';
 
 export interface SlideContext {
@@ -94,5 +95,5 @@ export const slides: SlideDef[] = [
   content('own-case', 5),
   activity('scenario', 6, Scenario, 'scenario'),
   activity('liudu', 6, LiuduCompare),
-  content('next-steps', 6),
+  contentWith('next-steps', 6, ToolsLink),
 ];
