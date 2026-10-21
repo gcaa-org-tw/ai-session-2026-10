@@ -65,6 +65,27 @@ test('follower cannot read the answer key but can read the mock release', async 
   await context.close();
 });
 
+test('follower can read the race results only after the reveal', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.raceBoard);
+  await seedDoc('public/raceResults', {
+    human: { entries: 1, caughtAvg: 1, missedAvg: 1, falseAlarmsAvg: 0, perSentence: { s2: 1, s4: 0 } },
+    agent: { entries: 0, caughtAvg: 0, missedAvg: 0, falseAlarmsAvg: 0, perSentence: { s2: 0, s4: 0 } },
+    planted: ['s2', 's4'],
+    explanations: { s2: ANSWER_KEY.s2.explanation, s4: ANSWER_KEY.s4.explanation },
+  });
+  const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
+  await expect(page.getByText('等待主持人揭曉')).toBeVisible();
+  const token = await page.evaluate(() => (window as unknown as { __e2eIdToken: () => Promise<string> }).__e2eIdToken());
+  const url = 'http://127.0.0.1:8080/v1/projects/demo-ai-session/databases/(default)/documents/public/raceResults';
+  const before = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  expect(before.status).toBe(403);
+  await seedSession(SLIDE.raceBoard, ['race']);
+  await expect(page.getByTestId('race-planted-s2')).toContainText(ANSWER_KEY.s2.explanation);
+  const after = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  expect(after.status).toBe(200);
+  await context.close();
+});
+
 test('follower never requests the answer key; presenter does', async ({ browser, baseURL }) => {
   await seedSession(SLIDE.race);
   const bodies: Record<string, string[]> = { follower: [], presenter: [] };

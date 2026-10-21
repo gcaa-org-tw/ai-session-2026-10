@@ -23,8 +23,12 @@ service cloud.firestore {
       allow write: if presenter();
     }
 
+    function raceRevealed() {
+      return get(/databases/$(database)/documents/session/live).data.revealed.get('race', false) == true;
+    }
+
     match /public/raceResults {
-      allow read: if allowed();
+      allow read: if presenter() || (allowed() && raceRevealed());
       allow write: if presenter();
     }
 
