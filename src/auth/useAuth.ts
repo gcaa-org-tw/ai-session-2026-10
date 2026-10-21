@@ -42,7 +42,7 @@ export function useAuth(): AuthState {
           setState({ status: 'denied', email: user.email ?? '（無電子郵件）' });
           return;
         }
-        setState({ status: 'ready', user, presenter: isPresenter(user.email, user.emailVerified) });
+        setState({ status: 'ready', user, presenter: isPresenter(user.uid, user.email, user.emailVerified) });
       },
       (err) => setState({ status: 'error', message: describeError(err) }),
     );

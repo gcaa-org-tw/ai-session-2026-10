@@ -8,7 +8,8 @@ import {
 } from '@firebase/rules-unit-testing';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const PRESENTER = 'presenter@example.com';
+const PRESENTER_UID = 'mPxi76Tc4HWN5q6bwqqXy76chfj2';
+const PRESENTER_EMAIL = 'presenter@gcaa.org.tw';
 
 let env: RulesTestEnvironment;
 
@@ -28,7 +29,7 @@ function as(uid: string, email: string, verified = true) {
 }
 
 const colleague = () => as('u1', 'a@gcaa.org.tw');
-const presenter = () => as('p1', PRESENTER);
+const presenter = () => as(PRESENTER_UID, PRESENTER_EMAIL);
 
 describe('access gate', () => {
   it('denies a stranger reading session/live', async () => {
@@ -53,14 +54,26 @@ describe('access gate', () => {
     await assertSucceeds(getDoc(doc(as('u2', 'A@GCAA.ORG.TW'), 'session/live')));
   });
 
-  it('treats an upper-case presenter address as presenter', async () => {
-    const db = as('p2', 'PRESENTER@EXAMPLE.COM');
+  it('treats the presenter uid as presenter whatever the address case', async () => {
+    const db = as(PRESENTER_UID, 'PRESENTER@GCAA.ORG.TW');
     await assertSucceeds(setDoc(doc(db, 'session/live'), { slideIndex: 1 }));
     await assertSucceeds(getDoc(doc(db, 'private/notes')));
   });
 
-  it('denies an unverified presenter address', async () => {
-    const db = as('p3', PRESENTER, false);
+  it('does not treat the presenter address under another uid as presenter', async () => {
+    const db = as('p2', PRESENTER_EMAIL);
+    await assertFails(getDoc(doc(db, 'private/notes')));
+    await assertFails(setDoc(doc(db, 'session/live'), { slideIndex: 1 }));
+  });
+
+  it('denies an unverified presenter uid', async () => {
+    const db = as(PRESENTER_UID, PRESENTER_EMAIL, false);
+    await assertFails(getDoc(doc(db, 'private/notes')));
+    await assertFails(setDoc(doc(db, 'session/live'), { slideIndex: 1 }));
+  });
+
+  it('denies the presenter uid on a non-gcaa address', async () => {
+    const db = as(PRESENTER_UID, 'presenter@gmail.com');
     await assertFails(getDoc(doc(db, 'private/notes')));
     await assertFails(setDoc(doc(db, 'session/live'), { slideIndex: 1 }));
   });
@@ -169,8 +182,8 @@ describe('presenter', () => {
   });
 
   it('writes own entry and name', async () => {
-    await assertSucceeds(setDoc(doc(presenter(), 'entries/habits/users/p1'), { value: {} }));
-    await assertSucceeds(setDoc(doc(presenter(), 'names/p1'), { displayName: 'P' }));
+    await assertSucceeds(setDoc(doc(presenter(), `entries/habits/users/${PRESENTER_UID}`), { value: {} }));
+    await assertSucceeds(setDoc(doc(presenter(), `names/${PRESENTER_UID}`), { displayName: 'P' }));
   });
 
   it('is denied an unknown path', async () => {

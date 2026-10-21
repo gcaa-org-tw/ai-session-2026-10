@@ -14,8 +14,8 @@ service cloud.firestore {
     }
 
     function presenter() {
-      return verified()
-        && request.auth.token.email.lower() == 'presenter@example.com';
+      return allowed()
+        && request.auth.uid == 'mPxi76Tc4HWN5q6bwqqXy76chfj2';
     }
 
     match /session/live {

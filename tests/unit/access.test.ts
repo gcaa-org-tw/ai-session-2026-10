@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isAllowedUser, isPresenter, PRESENTER_EMAIL } from '../../src/lib/access';
+import { isAllowedUser, isPresenter, PRESENTER_UID } from '../../src/lib/access';
 
 describe('isAllowedUser', () => {
   test('allows verified gcaa address', () => expect(isAllowedUser('a@gcaa.org.tw', true)).toBe(true));
@@ -13,9 +13,14 @@ describe('isAllowedUser', () => {
 });
 
 describe('isPresenter', () => {
-  test('presenter exact', () => expect(isPresenter('presenter@example.com', true)).toBe(true));
-  test('presenter is case-insensitive', () => expect(isPresenter('PRESENTER@EXAMPLE.COM', true)).toBe(true));
-  test('other staff not presenter', () => expect(isPresenter('b@gcaa.org.tw', true)).toBe(false));
-  test('unverified presenter rejected', () => expect(isPresenter('presenter@example.com', false)).toBe(false));
-  test('exports the presenter address', () => expect(PRESENTER_EMAIL).toBe('presenter@example.com'));
+  test('presenter uid with a verified gcaa address', () => expect(isPresenter(PRESENTER_UID, 'p@gcaa.org.tw', true)).toBe(true));
+  test('presenter uid ignores address case', () => expect(isPresenter(PRESENTER_UID, 'P@GCAA.ORG.TW', true)).toBe(true));
+  test('another uid is not presenter whatever the address', () => expect(isPresenter('someone-else', 'p@gcaa.org.tw', true)).toBe(false));
+  test('unverified presenter rejected', () => expect(isPresenter(PRESENTER_UID, 'p@gcaa.org.tw', false)).toBe(false));
+  test('presenter uid on a non-gcaa address rejected', () => expect(isPresenter(PRESENTER_UID, 'p@gmail.com', true)).toBe(false));
+  test('missing uid rejected', () => {
+    expect(isPresenter(null, 'p@gcaa.org.tw', true)).toBe(false);
+    expect(isPresenter(undefined, 'p@gcaa.org.tw', true)).toBe(false);
+  });
+  test('exports the presenter uid', () => expect(PRESENTER_UID).toBe('mPxi76Tc4HWN5q6bwqqXy76chfj2'));
 });

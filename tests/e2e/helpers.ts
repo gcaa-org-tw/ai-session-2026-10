@@ -1,10 +1,11 @@
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 import { copy } from '../../src/content/copy';
+import { PRESENTER_UID } from '../../src/lib/access';
 import type { SlideId } from '../../src/content/copy';
 
 const PROJECT = 'demo-ai-session';
 
-export const PRESENTER = 'presenter@example.com';
+export const PRESENTER = 'presenter@gcaa.org.tw';
 
 async function expectOk(res: Response, what: string): Promise<void> {
   if (!res.ok) throw new Error(`${what} failed: ${res.status}`);
@@ -21,7 +22,28 @@ export async function resetEmulators(): Promise<void> {
   );
 }
 
+export async function ensureAccount(email: string, localId: string): Promise<void> {
+  await expectOk(
+    await fetch(`http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:batchCreate`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer owner', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        users: [
+          {
+            localId,
+            email,
+            emailVerified: true,
+            providerUserInfo: [{ providerId: 'google.com', rawId: email, federatedId: email, email }],
+          },
+        ],
+      }),
+    }),
+    `create account ${email}`,
+  );
+}
+
 export async function openAs(browser: Browser, baseURL: string | undefined, email: string, hash: string): Promise<{ context: BrowserContext; page: Page }> {
+  if (email === PRESENTER) await ensureAccount(PRESENTER, PRESENTER_UID);
   const context = await browser.newContext({ baseURL });
   const page = await context.newPage();
   await page.goto(hash);

@@ -1,4 +1,4 @@
-export const PRESENTER_EMAIL = 'presenter@example.com';
+export const PRESENTER_UID = 'mPxi76Tc4HWN5q6bwqqXy76chfj2';
 
 const ALLOWED_SUFFIX = '@gcaa.org.tw';
 
@@ -7,7 +7,7 @@ export function isAllowedUser(email: string | null | undefined, emailVerified: b
   return email.toLowerCase().endsWith(ALLOWED_SUFFIX);
 }
 
-export function isPresenter(email: string | null | undefined, emailVerified: boolean): boolean {
+export function isPresenter(uid: string | null | undefined, email: string | null | undefined, emailVerified: boolean): boolean {
   if (!isAllowedUser(email, emailVerified)) return false;
-  return email?.toLowerCase() === PRESENTER_EMAIL;
+  return uid === PRESENTER_UID;
 }
