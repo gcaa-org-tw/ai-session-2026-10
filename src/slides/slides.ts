@@ -14,6 +14,7 @@ import { copy } from '../content/copy';
 import type { SlideId } from '../content/copy';
 import type { ActivityId, SectionId } from '../lib/types';
 import SlideText from './SlideText';
+import WorkflowsTable from './WorkflowsTable';
 
 export interface SlideContext {
   isPresenter: boolean;
@@ -53,11 +54,29 @@ function activity(id: SlideId, section: SectionId, component: ActivityComponent,
   };
 }
 
+function contentWith(id: SlideId, section: SectionId, component: () => JSX.Element): SlideDef {
+  const { title, body } = copy.slides[id];
+  return {
+    id,
+    section,
+    title,
+    kind: 'content',
+    render: () =>
+      createElement(
+        'div',
+        { className: 'flex flex-col' },
+        createElement(SlideText, { title, body, compact: true }),
+        createElement('div', { className: 'px-4 pb-6 sm:px-8' }, createElement(component)),
+      ),
+  };
+}
+
 export const slides: SlideDef[] = [
   content('opening', 0),
   activity('warmup', 1, Warmup, 'warmup'),
   content('what-changed', 2),
   activity('habits', 2, Habits, 'habits'),
+  content('principles', 2),
   content('chat-vs-agent', 3),
   activity('concepts', 3, FlipCards),
   content('logic', 3),
@@ -65,6 +84,7 @@ export const slides: SlideDef[] = [
   content('demo-plan', 3),
   content('demo-factcheck', 3),
   content('demo-subagents', 3),
+  contentWith('workflows', 3, WorkflowsTable),
   activity('wishlist', 4, Wishlist, 'wishlist'),
   content('setup-check', 5),
   content('folder-rules', 5),

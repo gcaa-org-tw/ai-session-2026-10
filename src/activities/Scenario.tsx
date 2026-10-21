@@ -66,7 +66,7 @@ export default function Scenario({ isPresenter }: ActivityProps) {
       <SaveStatus status={status} failed={failed} error={error} hasValue={value !== null} onRetry={() => void retry()} />
       <NameError error={name.error} busy={name.busy} onRetry={() => void name.remember()} />
       <div className="flex flex-col gap-2">
-        <h3 className={`font-semibold ${wrapText}`}>{copy.scenarioPrompts.what}</h3>
+        <h3 className={`font-semibold ${wrapText}`}>{copy.scenarioBoardTitle}</h3>
         <Board />
       </div>
       {isPresenter && <ExportCsv />}

@@ -31,7 +31,7 @@ describe('slides', () => {
   });
   test('slides follow the draft order exactly', () => {
     expect(slides.map((s) => s.id)).toEqual(Object.keys(copy.slides));
-    expect(slides).toHaveLength(21);
+    expect(slides).toHaveLength(23);
   });
   test('section labels come from the draft', () => {
     expect(sectionLabels).toEqual(copy.sections);

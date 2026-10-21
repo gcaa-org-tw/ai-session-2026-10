@@ -81,6 +81,7 @@ export const SLIDE = {
   concepts: indexOf('concepts'),
   flowchart: indexOf('flowchart'),
   wishlist: indexOf('wishlist'),
+  workflows: indexOf('workflows'),
   folderRules: indexOf('folder-rules'),
   race: indexOf('race'),
   raceBoard: indexOf('race-board'),

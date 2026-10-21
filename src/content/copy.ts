@@ -5,6 +5,7 @@ export type SlideId =
   | 'warmup'
   | 'what-changed'
   | 'habits'
+  | 'principles'
   | 'chat-vs-agent'
   | 'concepts'
   | 'logic'
@@ -12,6 +13,7 @@ export type SlideId =
   | 'demo-plan'
   | 'demo-factcheck'
   | 'demo-subagents'
+  | 'workflows'
   | 'wishlist'
   | 'setup-check'
   | 'folder-rules'
@@ -94,11 +96,13 @@ export interface RaceLabels {
   averagePerEntry: string;
   perSentence: string;
   explanation: string;
+  pickRoleFirst: string;
 }
 
 export interface SetupStep {
   title: string;
   body: string[];
+  extra?: 'deck' | 'meet';
 }
 
 export interface SetupCopy {
@@ -121,6 +125,42 @@ export interface LiuduCopy {
   openSite: string;
 }
 
+export type WorkflowColumn = 'gave' | 'context' | 'did' | 'mine';
+
+export interface WorkflowRow extends Record<WorkflowColumn, string> {
+  name: string;
+}
+
+export interface WorkflowsCopy {
+  columns: Record<WorkflowColumn, string>;
+  rows: WorkflowRow[];
+}
+
+export interface ToolItem {
+  name: string;
+  what: string;
+  source: string;
+  sourceLabel: string;
+}
+
+export interface ToolGroup {
+  heading: string;
+  items: ToolItem[];
+}
+
+export interface ToolHowTo {
+  heading: string;
+  body: string[];
+}
+
+export interface ToolsCopy {
+  title: string;
+  linkLabel: string;
+  intro: string;
+  howTo: ToolHowTo[];
+  groups: ToolGroup[];
+}
+
 export interface Copy {
   slides: Record<SlideId, SlideCopy>;
   workTypes: WorkType[];
@@ -141,6 +181,10 @@ export interface Copy {
   sections: Record<SectionId, string>;
   race: RaceLabels;
   liudu: LiuduCopy;
+  scenarioBoardTitle: string;
+  workflows: WorkflowsCopy;
+  tools: ToolsCopy;
+  warmNotesHeading: string;
   setup: SetupCopy;
 }
 
@@ -175,6 +219,15 @@ export const copy: Copy = {
       body: [
         '每張卡片放進一格：過時、仍然有用、新習慣。',
         '沒有標準答案，揭曉時看大家怎麼分，再討論分歧。',
+      ],
+    },
+    principles: {
+      title: '和 AI 工作的原則',
+      body: [
+        '給它什麼，就得到什麼：材料有錯或缺漏，結果也會跟著錯。',
+        '背景、規則和進度寫成純文字檔（.md）。人和 AI 都讀得懂，換了工具也帶得走。',
+        '沒有來源的事實，一律當作還沒查證。',
+        '交出去的工作要自己驗收：點開原始資料對一遍，不只看它的摘要。',
       ],
     },
     'chat-vs-agent': {
@@ -220,6 +273,10 @@ export const copy: Copy = {
         '一份有幾十個註腳的說帖，交給它查證每一個引用。',
         '看它怎麼把工作分給幾個子代理，再把結果彙整回來。',
       ],
+    },
+    workflows: {
+      title: '四個工作流程實例',
+      body: [],
     },
     wishlist: {
       title: '願望清單',
@@ -610,6 +667,7 @@ export const copy: Copy = {
     averagePerEntry: '每份平均',
     perSentence: '各句被抓到的份數',
     explanation: '說明',
+    pickRoleFirst: '請先選擇你這組負責的方式',
   },
   liudu: {
     staticLabel: '圖片',
@@ -621,6 +679,117 @@ export const copy: Copy = {
     siteTitle: '永續韌性城市政策承諾網站',
     openSite: '在新分頁開啟網站',
   },
+  scenarioBoardTitle: '接下來，有什麼任務可能給代理 AI 處理？',
+  workflows: {
+    columns: {
+      gave: '我給了什麼',
+      context: 'AI 拿到的背景',
+      did: 'AI 做了什麼',
+      mine: '留在我手上的',
+    },
+    rows: [
+      {
+        name: '形象影片',
+        gave: '主軸、素材範圍、自己錄的旁白、每一版的看片回饋',
+        context: '規則檔（用途、限制、每個事實要追到公開資料）、決定紀錄、素材清單、主管版腳本',
+        did: '盤點素材、寫腳本草稿與分鏡、做動畫字卡、旁白對位、合成配樂、逐版出片',
+        mine: '腳本取捨、要不要點名企業、素材授權、每一版的審看',
+      },
+      {
+        name: '名片辨識工具',
+        gave: '需求回答、範圍決定（只限同仁登入、照片不儲存）、測試用名片、盲測時選出正確值',
+        context: '規則檔（圖片不儲存、只限同仁登入）、設計規格、實作計畫、附來源網址的模型研究',
+        did: '比較候選模型、寫規格與計畫、寫程式與測試、調校設定、設計介面與介面文字',
+        mine: '逐段核可設計、判定哪些錯誤可以接受、雲端帳單與預算、部署上線',
+      },
+      {
+        name: '會議逐字稿',
+        gave: '錄音檔、要哪種成品（正式紀錄或摘要）、議程與出席名單、自己的筆記',
+        context: 'skill（十二個步驟與摘要格式）、領域詞表（碳費、裁罰等）、已知同事的聲紋、正式紀錄範本',
+        did: '轉錄並分出說話者、推斷誰在說話、分段修錯字、寫摘要、發佈成 Google 文件',
+        mine: '確認說話者是誰、送出前核對紀錄、敏感會議改在本機處理',
+      },
+      {
+        name: '社群貼文成效追蹤',
+        gave: '主要指標定為「瀏覽」、資料回溯一年、只限同仁登入、帳號授權與一次性設定、逐輪回饋',
+        context: '規則檔（指標規則、試算表衍生欄位一律用公式）、設計規格、決定紀錄、參考網站',
+        did: '測試 Meta API、寫每日抓取程式、寫入試算表、設定排程、做圖表頁、拿官方後台數字對照',
+        mine: '指標定義、哪些功能要做、手機實測、權杖失效時重新授權',
+      },
+    ],
+  },
+  tools: {
+    title: '可以試用的工具',
+    linkLabel: '可以試用的工具清單',
+    intro: '每一項都附來源網址。標示「需要協助」的項目，安裝時請找主持人。',
+    howTo: [
+      {
+        heading: '安裝 skill',
+        body: [
+          'skill 是一個資料夾，裡面有一個 SKILL.md。',
+          '只給一個專案用：放進那個專案資料夾的 .agents/skills/。',
+          '讓所有專案都能用：放進 ~/.gemini/config/skills/（~ 是你的使用者資料夾）。',
+          '名稱以「.」開頭的資料夾在 Finder 裡預設看不到，按 Command＋Shift＋. 就會顯示。',
+        ],
+      },
+      {
+        heading: '加入 MCP',
+        body: [
+          '點左下角的 Settings，選 Customizations，在 Installed MCP Servers 按 Add MCP，進入 MCP Store 搜尋名稱，再按 Add。',
+          'MCP 的工具預設每次執行前都會先問你，你核准了才會動。',
+        ],
+      },
+    ],
+    groups: [
+      {
+        heading: '自己就能裝',
+        items: [
+          {
+            name: 'fact-check（skill）',
+            what: '練習包裡的查核 skill。複製到 ~/.gemini/config/skills/ 之後，每個專案都能用。',
+            source: '',
+            sourceLabel: '分享會練習包',
+          },
+          {
+            name: 'humanizer-zh-tw（skill）',
+            what: '找出中文稿裡像 AI 寫的句型和用語，並提出改寫。下載整個專案，把資料夾改名為 humanizer-zh-tw，放進 skill 資料夾。',
+            source: 'https://github.com/kevintsai1202/Humanizer-zh-TW',
+            sourceLabel: '',
+          },
+          {
+            name: 'Exa（MCP）',
+            what: '搜尋網路，並把網頁內容讀成文字，適合蒐集資料。在 MCP Store 搜尋 Exa；不登入也能用，但有流量限制。',
+            source: 'https://github.com/exa-labs/exa-mcp-server',
+            sourceLabel: '',
+          },
+        ],
+      },
+      {
+        heading: '需要協助',
+        items: [
+          {
+            name: '台灣法律資料庫（MCP）',
+            what: '查司法院裁判書、全國法規資料庫、大法官解釋與憲法法庭裁判。電腦要先裝 Python；還沒在 Antigravity 上測試過。',
+            source: 'https://github.com/lawchat-oss/mcp-taiwan-legal-db',
+            sourceLabel: '',
+          },
+          {
+            name: '歐噴資料庫',
+            what: '查公司稅籍、選舉、政府採購、立法院議事等公共資料。要在網站註冊並完成手機認證；認證後可免費使用到 2026 年 12 月 31 日。',
+            source: 'https://data.openfun.tw',
+            sourceLabel: '',
+          },
+          {
+            name: 'Google Workspace（MCP）',
+            what: '讓代理讀寫雲端硬碟、文件、試算表和日曆。Google 官方還在開發者預覽階段，要先建 Google Cloud 專案並設定授權。',
+            source: 'https://developers.google.com/workspace/guides/configure-mcp-servers',
+            sourceLabel: '',
+          },
+        ],
+      },
+    ],
+  },
+  warmNotesHeading: '大家的補充',
   setup: {
     title: '分享會前的準備',
     intro: '請在分享會前完成下面五個步驟。',
@@ -638,9 +807,7 @@ export const copy: Copy = {
       },
       {
         title: '登入 Antigravity',
-        body: [
-          '請用 gcaa.org.tw 帳號登入。登入遇到問題，請在分享會前告訴主持人。',
-        ],
+        body: ['請用 gcaa.org.tw 帳號登入。登入遇到問題，請在分享會前告訴主持人。'],
       },
       {
         title: '資料使用設定',
@@ -652,15 +819,13 @@ export const copy: Copy = {
       },
       {
         title: '開啟簡報',
-        body: [
-          '一樣用 gcaa.org.tw 帳號登入簡報。瀏覽器如果自動選了別的帳號，頁面會出現切換帳號的按鈕。',
-        ],
+        body: ['一樣用 gcaa.org.tw 帳號登入簡報。瀏覽器如果自動選了別的帳號，頁面會出現切換帳號的按鈕。'],
+        extra: 'deck',
       },
       {
         title: '加入 Google Meet',
-        body: [
-          '可以把 Meet 和簡報並排，簡報在窄視窗也能正常使用。',
-        ],
+        body: ['可以把 Meet 和簡報並排，簡報在窄視窗也能正常使用。'],
+        extra: 'meet',
       },
     ],
   },

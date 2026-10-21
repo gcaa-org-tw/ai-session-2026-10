@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { copy } from '../../src/content/copy';
 import { adminGetDoc, adminListIds, openAs, PRESENTER, resetEmulators, seedSession, SLIDE } from './helpers';
 
 const ALICE = 'alice.wu@gcaa.org.tw';
@@ -164,6 +165,7 @@ test('scenario board lists only what, and an opt-in writes the name doc', async 
   const a = await openAs(browser, baseURL, ALICE, '#/');
   const b = await openAs(browser, baseURL, BOB, '#/');
   await expect(b.page.getByTestId('scenario-board')).toContainText('還沒有人填寫');
+  await expect(b.page.getByRole('heading', { name: copy.scenarioBoardTitle })).toBeVisible();
 
   await a.page.getByRole('textbox', { name: '回去之後，你要交給代理的是哪一件工作？' }).fill('整理會員名單');
   await a.page.getByRole('textbox', { name: '會用到哪些檔案或資料？' }).fill('會員.csv');
