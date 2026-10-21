@@ -1,57 +1,76 @@
 import { createElement } from 'react';
 import type { JSX } from 'react';
+import Flowchart from '../activities/Flowchart';
+import FlipCards from '../activities/FlipCards';
+import Habits from '../activities/Habits';
+import PendingActivity from '../activities/PendingActivity';
+import Scenario from '../activities/Scenario';
+import type { ActivityComponent } from '../activities/types';
+import Warmup from '../activities/Warmup';
+import Wishlist from '../activities/Wishlist';
+import { copy } from '../content/copy';
+import type { SlideId } from '../content/copy';
 import type { ActivityId, SectionId } from '../lib/types';
-import PlaceholderActivity from '../activities/PlaceholderActivity';
-import Placeholder from './Placeholder';
+import SlideText from './SlideText';
+
+export interface SlideContext {
+  isPresenter: boolean;
+}
 
 export interface SlideDef {
-  id: string;
+  id: SlideId;
   section: SectionId;
   title: string;
   kind: 'content' | 'activity';
   activity?: ActivityId;
-  render: () => JSX.Element;
+  render: (ctx: SlideContext) => JSX.Element;
 }
 
-export const sectionLabels: Record<SectionId, string> = {
-  0: '開場',
-  1: '認識 AI 助手',
-  2: '日常習慣',
-  3: '實際需求',
-  4: '查核實作',
-  5: '情境練習',
-  6: '收尾',
-};
+export const sectionLabels: Record<SectionId, string> = copy.sections;
 
-function content(id: string, section: SectionId, title: string, body: string): SlideDef {
-  return { id, section, title, kind: 'content', render: () => createElement(Placeholder, { title, body }) };
+function content(id: SlideId, section: SectionId): SlideDef {
+  const { title, body } = copy.slides[id];
+  return { id, section, title, kind: 'content', render: () => createElement(SlideText, { title, body }) };
 }
 
-function activity(id: string, section: SectionId, activityId: ActivityId, title: string): SlideDef {
+function activity(id: SlideId, section: SectionId, component: ActivityComponent, activityId?: ActivityId): SlideDef {
+  const { title, body } = copy.slides[id];
   return {
     id,
     section,
     title,
     kind: 'activity',
     activity: activityId,
-    render: () => createElement(Placeholder, { title, body: '互動活動即將開放。' }),
+    render: (ctx) =>
+      createElement(
+        'div',
+        { className: 'flex flex-col' },
+        createElement(SlideText, { title, body, compact: true }),
+        createElement('div', { className: 'px-4 pb-6 sm:px-8' }, createElement(component, ctx)),
+      ),
   };
 }
 
-function habitsActivity(id: string, section: SectionId): SlideDef {
-  return { id, section, title: '日常習慣整理', kind: 'activity', activity: 'habits', render: () => createElement(PlaceholderActivity) };
-}
-
 export const slides: SlideDef[] = [
-  content('opening', 0, 'AI 分享會', '歡迎，請保持這個頁面開啟。'),
-  activity('warmup', 0, 'warmup', '暖身：你現在用到哪裡'),
-  content('what-is-agent', 1, 'AI 助手能做什麼', '從對話到動手做事。'),
-  habitsActivity('habits', 1),
-  content('rules-files', 2, '把規則寫下來', '讓助手每次都照同樣的規矩做事。'),
-  content('wish-intro', 3, '你最想交給助手的事', '先想，再分類。'),
-  activity('wishlist', 3, 'wishlist', '願望清單'),
-  activity('race', 4, 'race', '查核競賽'),
-  content('scenario-intro', 5, '帶回工作的情境', '挑一件你下週就能試的事。'),
-  activity('scenario', 5, 'scenario', '情境練習'),
-  content('closing', 6, '謝謝大家', '後續協助請留下意見。'),
+  content('opening', 0),
+  activity('warmup', 1, Warmup, 'warmup'),
+  content('what-changed', 2),
+  activity('habits', 2, Habits, 'habits'),
+  content('chat-vs-agent', 3),
+  activity('concepts', 3, FlipCards),
+  content('logic', 3),
+  activity('flowchart', 3, Flowchart),
+  content('demo-plan', 3),
+  content('demo-factcheck', 3),
+  content('demo-subagents', 3),
+  activity('wishlist', 4, Wishlist, 'wishlist'),
+  content('setup-check', 5),
+  content('folder-rules', 5),
+  content('race-intro', 5),
+  activity('race', 5, PendingActivity, 'race'),
+  activity('race-board', 5, PendingActivity, 'race'),
+  content('own-case', 5),
+  activity('scenario', 6, Scenario, 'scenario'),
+  activity('liudu', 6, PendingActivity),
+  content('next-steps', 6),
 ];

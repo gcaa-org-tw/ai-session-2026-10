@@ -143,7 +143,7 @@ function PresenterConsole() {
 
         <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
           <div data-testid="presenter-current">
-            <SlideView slide={slide} index={index} />
+            <SlideView slide={slide} index={index} isPresenter />
           </div>
           <div className="flex flex-col gap-4">
             <div data-testid="presenter-next">

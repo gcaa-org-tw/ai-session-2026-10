@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { clampSlide } from '../../src/lib/slideNav';
-import { slides } from '../../src/slides/slides';
+import { copy } from '../../src/content/copy';
+import { sectionLabels, slides } from '../../src/slides/slides';
 import type { SectionId } from '../../src/lib/types';
 
 describe('clampSlide', () => {
@@ -20,7 +21,19 @@ describe('slides', () => {
   test('slide ids are unique', () => {
     expect(new Set(slides.map((s) => s.id)).size).toBe(slides.length);
   });
-  test('activity slides name their activity', () => {
-    for (const s of slides) if (s.kind === 'activity') expect(s.activity).toBeDefined();
+  test('activity slides with shared state name their activity', () => {
+    const stateless = ['concepts', 'flowchart', 'liudu'];
+    for (const s of slides) {
+      if (s.kind !== 'activity') continue;
+      if (stateless.includes(s.id)) expect(s.activity).toBeUndefined();
+      else expect(s.activity).toBeDefined();
+    }
+  });
+  test('slides follow the draft order exactly', () => {
+    expect(slides.map((s) => s.id)).toEqual(Object.keys(copy.slides));
+    expect(slides).toHaveLength(21);
+  });
+  test('section labels come from the draft', () => {
+    expect(sectionLabels).toEqual(copy.sections);
   });
 });

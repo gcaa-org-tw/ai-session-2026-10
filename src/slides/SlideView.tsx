@@ -5,16 +5,22 @@ interface SlideViewProps {
   slide: SlideDef;
   index: number;
   preview?: boolean;
+  isPresenter?: boolean;
 }
 
-export default function SlideView({ slide, index, preview = false }: SlideViewProps) {
+export default function SlideView({ slide, index, preview = false, isPresenter = false }: SlideViewProps) {
+  const frame = preview
+    ? 'aspect-[16/9] overflow-hidden'
+    : slide.kind === 'content'
+      ? 'aspect-[16/9]'
+      : '';
   return (
     <section
       data-slide-index={index}
       data-slide-id={slide.id}
-      className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-white shadow"
+      className={`${frame} w-full rounded-xl bg-white shadow`}
     >
-      {preview && slide.kind === 'activity' ? <Placeholder title={slide.title} body="互動活動" /> : slide.render()}
+      {preview && slide.kind === 'activity' ? <Placeholder title={slide.title} body="互動活動" /> : slide.render({ isPresenter })}
     </section>
   );
 }

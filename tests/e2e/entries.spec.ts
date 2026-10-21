@@ -1,52 +1,53 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { adminGetDoc, adminListIds, openAs, PRESENTER, resetEmulators, seedNotes, seedSession } from './helpers';
+import { adminGetDoc, adminListIds, openAs, PRESENTER, resetEmulators, seedNotes, seedSession, SLIDE } from './helpers';
 
-const HABITS_SLIDE = 3;
+const HABITS_SLIDE = SLIDE.habits;
 
 test.beforeEach(async () => {
   await resetEmulators();
 });
 
-function card(page: Page, name: string) {
-  return page.getByRole('button', { name });
+function bin(page: Page, card: string, name: string) {
+  return page.getByTestId(`habit-${card}`).getByRole('button', { name, exact: true });
 }
 
 test('saves a habits entry, restores it after reload, and keeps one doc per user', async ({ browser, baseURL }) => {
   await seedSession(HABITS_SLIDE);
   const { context, page } = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
-  await expect(card(page, '自動摘要')).toBeVisible();
-  await expect(page.getByTestId('save-status')).toHaveText('尚未填寫');
+  await expect(bin(page, 'h1', '過時')).toBeVisible();
+  await expect(page.getByTestId('save-status')).toHaveCount(0);
 
-  await card(page, '自動摘要').click();
+  await bin(page, 'h1', '過時').click();
   await expect(page.getByTestId('save-status')).toHaveText('已儲存');
 
   await page.reload();
-  await expect(card(page, '自動摘要')).toHaveAttribute('aria-pressed', 'true');
+  await expect(bin(page, 'h1', '過時')).toHaveAttribute('aria-pressed', 'true');
 
-  await card(page, '查資料').click();
+  await bin(page, 'h2', '新習慣').click();
   await expect(page.getByTestId('save-status')).toHaveText('已儲存');
-  await expect(card(page, '查資料')).toHaveAttribute('aria-pressed', 'true');
+  await expect(bin(page, 'h2', '新習慣')).toHaveAttribute('aria-pressed', 'true');
+  await expect(bin(page, 'h1', '過時')).toHaveAttribute('aria-pressed', 'true');
 
   const ids = await adminListIds('entries/habits/users');
   expect(ids).toHaveLength(1);
   const doc = await adminGetDoc(`entries/habits/users/${ids[0]}`);
-  expect(doc).toEqual({ placements: { search: 'useful' } });
+  expect(doc).toEqual({ placements: { h1: 'outdated', h2: 'new' } });
   await context.close();
 });
 
 test('shows 儲存失敗 offline, retry succeeds online, and no duplicate appears', async ({ browser, baseURL }) => {
   await seedSession(HABITS_SLIDE);
   const { context, page } = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
-  await expect(card(page, '自動摘要')).toBeVisible();
-  await expect(page.getByTestId('save-status')).toHaveText('尚未填寫');
+  await expect(bin(page, 'h1', '過時')).toBeVisible();
+  await expect(page.getByTestId('save-status')).toHaveCount(0);
 
   await context.setOffline(true);
-  await card(page, '自動摘要').click();
-  await expect(page.getByTestId('save-status')).toHaveText('儲存中…');
-  await expect(card(page, '自動摘要')).toBeDisabled();
+  await bin(page, 'h1', '過時').click();
+  await expect(page.getByTestId('save-status')).toHaveText('儲存中');
+  await expect(bin(page, 'h1', '過時')).toBeDisabled();
   await expect(page.getByTestId('save-status')).toHaveText('儲存失敗', { timeout: 15000 });
-  const retry = page.getByRole('button', { name: '重試' });
+  const retry = page.getByRole('button', { name: '再試一次' });
   await expect(retry).toBeVisible();
 
   await context.setOffline(false);
@@ -55,26 +56,26 @@ test('shows 儲存失敗 offline, retry succeeds online, and no duplicate appear
 
   const ids = await adminListIds('entries/habits/users');
   expect(ids).toHaveLength(1);
-  expect(await adminGetDoc(`entries/habits/users/${ids[0]}`)).toEqual({ placements: { summary: 'useful' } });
+  expect(await adminGetDoc(`entries/habits/users/${ids[0]}`)).toEqual({ placements: { h1: 'outdated' } });
   await context.close();
 });
 
 test('a follower arriving on an activity slide sees their saved entry', async ({ browser, baseURL }) => {
   await seedSession(HABITS_SLIDE);
   const first = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
-  await card(first.page, '查資料').click();
+  await bin(first.page, 'h3', '仍然有用').click();
   await expect(first.page.getByTestId('save-status')).toHaveText('已儲存');
   await first.context.close();
 
   const late = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
   await expect(late.page.locator('[data-slide-id="habits"]')).toBeVisible();
-  await expect(card(late.page, '查資料')).toHaveAttribute('aria-pressed', 'true');
-  await expect(card(late.page, '自動摘要')).toHaveAttribute('aria-pressed', 'false');
+  await expect(bin(late.page, 'h3', '仍然有用')).toHaveAttribute('aria-pressed', 'true');
+  await expect(bin(late.page, 'h3', '過時')).toHaveAttribute('aria-pressed', 'false');
   await late.context.close();
 
   const other = await openAs(browser, baseURL, 'b@gcaa.org.tw', '#/');
-  await expect(card(other.page, '查資料')).toHaveAttribute('aria-pressed', 'false');
-  await expect(other.page.getByTestId('save-status')).toHaveText('尚未填寫');
+  await expect(bin(other.page, 'h3', '仍然有用')).toHaveAttribute('aria-pressed', 'false');
+  await expect(other.page.getByTestId('save-status')).toHaveCount(0);
   await other.context.close();
 });
 
@@ -103,7 +104,7 @@ test('presenter next-slide preview of an activity is static and creates no entry
   await expect(next.getByRole('button')).toHaveCount(0);
   await expect(next.getByTestId('save-status')).toHaveCount(0);
   await expect(page.getByTestId('save-status')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '自動摘要' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '過時', exact: true })).toHaveCount(0);
   await page.waitForTimeout(1000);
   expect(await adminListIds('entries/habits/users')).toEqual([]);
   await context.close();

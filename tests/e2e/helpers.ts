@@ -65,7 +65,9 @@ export async function adminListIds(collectionPath: string): Promise<string[]> {
   return (body.documents ?? []).map((d) => d.name.split('/').pop() ?? '');
 }
 
-export async function seedSession(slideIndex: number): Promise<void> {
+export const SLIDE = { warmup: 1, habits: 3, concepts: 5, flowchart: 7, wishlist: 11, scenario: 18 } as const;
+
+export async function seedSession(slideIndex: number, revealed: string[] = []): Promise<void> {
   const res = await fetch(`${FS_BASE}/session/live`, {
     method: 'PATCH',
     headers: ADMIN,
@@ -73,7 +75,7 @@ export async function seedSession(slideIndex: number): Promise<void> {
       fields: {
         slideIndex: { integerValue: String(slideIndex) },
         openActivity: { nullValue: null },
-        revealed: { mapValue: { fields: {} } },
+        revealed: { mapValue: { fields: Object.fromEntries(revealed.map((id) => [id, { booleanValue: true }])) } },
       },
     }),
   });

@@ -13,6 +13,7 @@ type SaveStatus = Exclude<EntryStatus, 'loading'>;
 interface MyEntry<T> {
   value: T | null;
   status: EntryStatus;
+  failed: 'read' | 'write' | null;
   error: string | null;
   save: (v: T) => Promise<void>;
   retry: () => Promise<void>;
@@ -99,11 +100,11 @@ export function useMyEntry<T extends object>(activity: ActivityId): MyEntry<T> {
   }, [save]);
 
   if ('initError' in init) {
-    return { value: null, status: 'error', error: init.initError, save, retry };
+    return { value: null, status: 'error', failed: 'read', error: init.initError, save, retry };
   }
-  if (readError) return { value, status: 'error', error: readError, save, retry };
-  if (!loaded) return { value, status: 'loading', error: null, save, retry };
-  return { value, status: saveStatus, error: saveError, save, retry };
+  if (readError) return { value, status: 'error', failed: 'read', error: readError, save, retry };
+  if (!loaded) return { value, status: 'loading', failed: null, error: null, save, retry };
+  return { value, status: saveStatus, failed: saveStatus === 'error' ? 'write' : null, error: saveError, save, retry };
 }
 
 export function useAllEntries<T extends object>(
