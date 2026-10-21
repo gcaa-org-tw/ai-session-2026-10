@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function verified() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email != null;
+    }
+
+    function allowed() {
+      return verified()
+        && request.auth.token.email.lower().matches('.*@gcaa[.]org[.]tw$');
+    }
+
+    function presenter() {
+      return verified()
+        && request.auth.token.email.lower() == 'presenter@example.com';
+    }
+
+    match /session/live {
+      allow read: if allowed();
+      allow write: if presenter();
+    }
+
+    match /public/raceResults {
+      allow read: if allowed();
+      allow write: if presenter();
+    }
+
+    match /entries/{activityId}/users/{uid} {
+      allow read: if allowed()
+        && activityId in ['warmup', 'habits', 'wishlist', 'race', 'scenario'];
+      allow write: if allowed()
+        && activityId in ['warmup', 'habits', 'wishlist', 'race', 'scenario']
+        && uid == request.auth.uid;
+    }
+
+    match /names/{uid} {
+      allow read: if presenter();
+      allow write: if allowed() && uid == request.auth.uid;
+    }
+
+    match /private/{docId} {
+      allow read: if docId in ['mockRelease', 'kit'] ? allowed() : presenter();
+      allow write: if presenter();
+    }
+  }
+}
