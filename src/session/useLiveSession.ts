@@ -43,10 +43,11 @@ function initRef(): { ref: DocumentReference } | { initError: string } {
   }
 }
 
-export function useLiveSession(): { state: LiveSession | null; error: string | null } {
+export function useLiveSession(): { state: LiveSession | null; error: string | null; loading: boolean } {
   const [init] = useState(initRef);
   const [state, setState] = useState<LiveSession | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const ref = 'ref' in init ? init.ref : null;
 
   useEffect(() => {
@@ -57,13 +58,17 @@ export function useLiveSession(): { state: LiveSession | null; error: string | n
         setError(null);
         const data = snap.data();
         setState(data ? parseLiveSession(data) : null);
+        setLoaded(true);
       },
-      (err) => setError(err.message),
+      (err) => {
+        setError(err.message);
+        setLoaded(true);
+      },
     );
   }, [ref]);
 
-  if ('initError' in init) return { state: null, error: init.initError };
-  return { state, error };
+  if ('initError' in init) return { state: null, error: init.initError, loading: false };
+  return { state, error, loading: !loaded };
 }
 
 let ensuring: Promise<void> | null = null;

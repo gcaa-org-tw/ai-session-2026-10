@@ -4,7 +4,7 @@ import SlideView from './SlideView';
 import { sectionLabels, slides } from './slides';
 
 export default function Follower() {
-  const { state, error } = useLiveSession();
+  const { state, error, loading } = useLiveSession();
 
   if (error) {
     return (
@@ -21,6 +21,22 @@ export default function Follower() {
           >
             重試
           </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="text-center">
+          <div
+            role="status"
+            aria-label="載入中"
+            data-testid="session-loading"
+            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700"
+          />
+          <p className="mt-4 text-slate-600">載入中…</p>
         </div>
       </main>
     );

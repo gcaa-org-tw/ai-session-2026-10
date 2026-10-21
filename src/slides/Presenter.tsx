@@ -32,7 +32,7 @@ export default function Presenter({ presenter }: PresenterProps) {
 }
 
 function PresenterConsole() {
-  const { state, error } = useLiveSession();
+  const { state, error, loading } = useLiveSession();
   const [initError, setInitError] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<string | null>(null);
   const [writing, setWriting] = useState(false);
@@ -89,7 +89,7 @@ function PresenterConsole() {
     );
   }
 
-  if (!state) {
+  if (loading || !state) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div role="status" aria-label="載入中" className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700" />

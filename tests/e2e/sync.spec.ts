@@ -11,6 +11,22 @@ test('follower waits while no session exists', async ({ browser, baseURL }) => {
   await context.close();
 });
 
+test('follower shows loading before the first snapshot, then the empty state', async ({ browser, baseURL }) => {
+  const { context, page } = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
+  await expect(page.getByText('等待主持人開始')).toBeVisible();
+
+  await context.route('**/google.firestore.v1.Firestore/Listen/**', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await route.continue();
+  });
+  await page.reload();
+  await expect(page.getByTestId('session-loading')).toBeVisible();
+  await expect(page.getByText('等待主持人開始')).toHaveCount(0);
+  await expect(page.getByText('等待主持人開始')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByTestId('session-loading')).toHaveCount(0);
+  await context.close();
+});
+
 test('presenter advances, follower follows, reload keeps state', async ({ browser, baseURL }) => {
   const presenter = await openAs(browser, baseURL, PRESENTER, '#/presenter');
   const current = presenter.page.getByTestId('presenter-current').locator('[data-slide-index]');
