@@ -110,6 +110,17 @@ export interface SetupCopy {
   steps: SetupStep[];
 }
 
+export interface LiuduCopy {
+  staticLabel: string;
+  interactiveLabel: string;
+  imageAlt: string;
+  imageSource: string;
+  imageSourceUrl: string;
+  siteUrl: string;
+  siteTitle: string;
+  openSite: string;
+}
+
 export interface Copy {
   slides: Record<SlideId, SlideCopy>;
   workTypes: WorkType[];
@@ -129,6 +140,7 @@ export interface Copy {
   states: StateLabels;
   sections: Record<SectionId, string>;
   race: RaceLabels;
+  liudu: LiuduCopy;
   setup: SetupCopy;
 }
 
@@ -598,7 +610,18 @@ export const copy: Copy = {
     averagePerEntry: '每份平均',
     perSentence: '各句被抓到的份數',
     explanation: '說明',
-  },  setup: {
+  },
+  liudu: {
+    staticLabel: '圖片',
+    interactiveLabel: '網頁',
+    imageAlt: '六都市長候選人簽署名單，2026 年 10 月 12 日新聞稿附圖',
+    imageSource: '圖片來源：2026 年 10 月 12 日聯合新聞稿',
+    imageSourceUrl: 'https://gcaa.org.tw/16804/',
+    siteUrl: 'https://six-cities.gcaa.org.tw/',
+    siteTitle: '永續韌性城市政策承諾網站',
+    openSite: '在新分頁開啟網站',
+  },
+  setup: {
     title: '分享會前的準備',
     intro: '請在分享會前完成下面五個步驟。',
     deckUrl: 'https://gcaa-org-tw.github.io/ai-session-2026-10/',

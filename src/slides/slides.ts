@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 import Flowchart from '../activities/Flowchart';
 import FlipCards from '../activities/FlipCards';
 import Habits from '../activities/Habits';
-import PendingActivity from '../activities/PendingActivity';
+import LiuduCompare from '../activities/LiuduCompare';
 import Race from '../activities/Race';
 import RaceBoard from '../activities/RaceBoard';
 import Scenario from '../activities/Scenario';
@@ -73,6 +73,6 @@ export const slides: SlideDef[] = [
   activity('race-board', 5, RaceBoard, 'race'),
   content('own-case', 5),
   activity('scenario', 6, Scenario, 'scenario'),
-  activity('liudu', 6, PendingActivity),
+  activity('liudu', 6, LiuduCompare),
   content('next-steps', 6),
 ];

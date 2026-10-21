@@ -65,7 +65,7 @@ export async function adminListIds(collectionPath: string): Promise<string[]> {
   return (body.documents ?? []).map((d) => d.name.split('/').pop() ?? '');
 }
 
-export const SLIDE = { warmup: 1, habits: 3, concepts: 5, flowchart: 7, wishlist: 11, race: 15, raceBoard: 16, scenario: 18 } as const;
+export const SLIDE = { warmup: 1, habits: 3, concepts: 5, flowchart: 7, wishlist: 11, race: 15, raceBoard: 16, scenario: 18, liudu: 19 } as const;
 
 export async function seedSession(slideIndex: number, revealed: string[] = []): Promise<void> {
   const res = await fetch(`${FS_BASE}/session/live`, {
