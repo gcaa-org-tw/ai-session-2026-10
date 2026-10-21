@@ -96,6 +96,20 @@ export interface RaceLabels {
   explanation: string;
 }
 
+export interface SetupStep {
+  title: string;
+  body: string[];
+}
+
+export interface SetupCopy {
+  title: string;
+  intro: string;
+  deckUrl: string;
+  meetUrl: string;
+  meetPending: string;
+  steps: SetupStep[];
+}
+
 export interface Copy {
   slides: Record<SlideId, SlideCopy>;
   workTypes: WorkType[];
@@ -115,6 +129,7 @@ export interface Copy {
   states: StateLabels;
   sections: Record<SectionId, string>;
   race: RaceLabels;
+  setup: SetupCopy;
 }
 
 export const copy: Copy = {
@@ -583,5 +598,47 @@ export const copy: Copy = {
     averagePerEntry: '每份平均',
     perSentence: '各句被抓到的份數',
     explanation: '說明',
+  },  setup: {
+    title: '分享會前的準備',
+    intro: '請在分享會前完成下面五個步驟。',
+    deckUrl: 'https://gcaa-org-tw.github.io/ai-session-2026-10/',
+    meetUrl: '',
+    meetPending: '會議連結會另外通知。',
+    steps: [
+      {
+        title: '安裝 Antigravity',
+        body: [
+          'Antigravity 是 Google 推出的 AI 代理工具，分享會的實作都用它。',
+          '電腦需求：macOS 12 以上，或 Windows 10（64 位元）以上。',
+          '下載：https://antigravity.google/download',
+        ],
+      },
+      {
+        title: '登入 Antigravity',
+        body: [
+          '請用 gcaa.org.tw 帳號登入。登入遇到問題，請在分享會前告訴主持人。',
+        ],
+      },
+      {
+        title: '資料使用設定',
+        body: [
+          '服務條款寫明，你和 Antigravity 的對話會被用來改進 Google 的產品，Google 的員工與約聘人員也可能閱讀。不希望對話被這樣使用，條款說可以到設定裡調整：https://antigravity.google/terms',
+          '條款沒有指明是哪一個選項。目前在設定裡找到唯一相關的開關：點側邊欄左下角的 Settings，再點設定視窗左下角的帳號列，進入 Account 頁，在 General 區關閉 Enable Telemetry。這個開關的說明是收集使用資料，是否就是條款所說的設定，官方沒有寫明。',
+          '練習只用分享會提供的練習包，不要放入捐款人資料或尚未公開的文件。',
+        ],
+      },
+      {
+        title: '開啟簡報',
+        body: [
+          '一樣用 gcaa.org.tw 帳號登入簡報。瀏覽器如果自動選了別的帳號，頁面會出現切換帳號的按鈕。',
+        ],
+      },
+      {
+        title: '加入 Google Meet',
+        body: [
+          '可以把 Meet 和簡報並排，簡報在窄視窗也能正常使用。',
+        ],
+      },
+    ],
   },
 };

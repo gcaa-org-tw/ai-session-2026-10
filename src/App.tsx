@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AuthGate from './auth/AuthGate';
+import Setup from './pages/Setup';
 import Upload from './pages/Upload';
 import Follower from './slides/Follower';
 import Presenter from './slides/Presenter';
@@ -18,6 +19,9 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
 
+  if (route === '/setup') {
+    return <Setup />;
+  }
   if (route === '/') {
     return <AuthGate>{() => <Follower />}</AuthGate>;
   }
