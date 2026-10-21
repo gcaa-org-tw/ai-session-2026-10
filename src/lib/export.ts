@@ -12,7 +12,8 @@ const BIN_LABEL: Record<WishBin, string> = {
 };
 
 function quote(cell: string): string {
-  return /[",\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
+  const safe = /^[=+\-@\t\r]/.test(cell) ? `'${cell}` : cell;
+  return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 function yesNo(value: boolean): string {

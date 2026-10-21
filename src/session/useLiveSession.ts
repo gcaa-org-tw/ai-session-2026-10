@@ -6,17 +6,13 @@ import { clampSlide } from '../lib/slideNav';
 import type { ActivityId, LiveSession } from '../lib/types';
 import { slides } from '../slides/slides';
 
-export const DEFAULT_SESSION: LiveSession = { slideIndex: 0, openActivity: null, revealed: {} };
+export const DEFAULT_SESSION: LiveSession = { slideIndex: 0, revealed: {} };
 
 const ACTIVITY_IDS: ActivityId[] = ['warmup', 'habits', 'wishlist', 'race', 'scenario'];
 
 function liveRef() {
   const { db } = getFirebase();
   return doc(db, 'session', 'live');
-}
-
-function isActivityId(v: unknown): v is ActivityId {
-  return typeof v === 'string' && (ACTIVITY_IDS as string[]).includes(v);
 }
 
 export function parseLiveSession(data: Record<string, unknown>): LiveSession {
@@ -30,7 +26,6 @@ export function parseLiveSession(data: Record<string, unknown>): LiveSession {
   }
   return {
     slideIndex: typeof data.slideIndex === 'number' ? clampSlide(data.slideIndex, slides.length) : 0,
-    openActivity: isActivityId(data.openActivity) ? data.openActivity : null,
     revealed,
   };
 }
@@ -89,10 +84,6 @@ export function ensureLiveSession(): Promise<void> {
 
 export async function setSlide(i: number): Promise<void> {
   await setDoc(liveRef(), { slideIndex: clampSlide(i, slides.length) }, { merge: true });
-}
-
-export async function setOpenActivity(a: ActivityId | null): Promise<void> {
-  await setDoc(liveRef(), { openActivity: a }, { merge: true });
 }
 
 export async function setRevealed(a: ActivityId, v: boolean): Promise<void> {

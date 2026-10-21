@@ -119,7 +119,6 @@ export async function seedSession(slideIndex: number, revealed: string[] = []): 
     body: JSON.stringify({
       fields: {
         slideIndex: { integerValue: String(slideIndex) },
-        openActivity: { nullValue: null },
         revealed: { mapValue: { fields: Object.fromEntries(revealed.map((id) => [id, { booleanValue: true }])) } },
       },
     }),

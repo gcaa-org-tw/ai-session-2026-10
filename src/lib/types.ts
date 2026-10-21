@@ -6,7 +6,7 @@ export type Role = 'human' | 'agent';
 export type WishBin = 'now' | 'build' | 'learn';
 export type SectionId = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export interface LiveSession { slideIndex: number; openActivity: ActivityId | null; revealed: Partial<Record<ActivityId, boolean>> }
+export interface LiveSession { slideIndex: number; revealed: Partial<Record<ActivityId, boolean>> }
 export interface WarmupEntry { marks: Record<string, WarmMark>; note: string }
 export interface HabitsEntry { placements: Record<string, Bin> }
 export interface WishItem { text: string; repeats: boolean; rulesWritable: boolean; sourceCheckable: boolean; optInName: boolean }

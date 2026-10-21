@@ -11,6 +11,17 @@ describe('toCsv', () => {
   test('escapes quotes and quotes cells with newlines', () => {
     expect(toCsv([['say "hi"', 'x\ny']])).toBe('\uFEFF"say ""hi""","x\ny"');
   });
+  test.each(['=1+1', '+1', '-1', '@SUM(A1)', '\tcmd', '\rcmd'])('prefixes an apostrophe when a cell starts with a formula character: %j', (cell) => {
+    const csv = toCsv([[cell]]);
+    expect(csv.startsWith("\uFEFF\"'") || csv.startsWith("\uFEFF'")).toBe(true);
+    expect(csv).toContain(`'${cell}`);
+  });
+  test('prefixes before quoting when the cell also needs quotes', () => {
+    expect(toCsv([['=A1,B1']])).toBe('\uFEFF"\'=A1,B1"');
+  });
+  test('leaves ordinary and mid-cell characters alone', () => {
+    expect(toCsv([['整理新聞稿', 'a=b', 'x-y', 'u@v']])).toBe('\uFEFF整理新聞稿,a=b,x-y,u@v');
+  });
   test('joins rows with CRLF', () => {
     expect(toCsv([['a'], ['b']])).toBe('\uFEFFa\r\nb');
   });

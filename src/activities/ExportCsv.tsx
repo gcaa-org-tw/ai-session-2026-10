@@ -6,6 +6,7 @@ import type { ScenarioEntry, WishEntry } from '../lib/types';
 import { LoadFailure, primaryButton } from './ui';
 
 const FILE_NAME = 'ai-session-export.csv';
+const URL_LIFETIME_MS = 60_000;
 
 export default function ExportCsv() {
   const wish = useAllEntries<WishEntry>('wishlist');
@@ -23,7 +24,7 @@ export default function ExportCsv() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), URL_LIFETIME_MS);
   }
 
   if (error) return <LoadFailure message={error} />;

@@ -114,12 +114,12 @@ describe('race results reveal gate', () => {
   }
 
   it('denies a colleague before the reveal flag is set', async () => {
-    await seedSession({ slideIndex: 0, openActivity: null, revealed: { race: false } });
+    await seedSession({ slideIndex: 0, revealed: { race: false } });
     await assertFails(getDoc(doc(colleague(), 'public/raceResults')));
   });
 
   it('denies a colleague when the session has no race flag', async () => {
-    await seedSession({ slideIndex: 0, openActivity: null, revealed: { habits: true } });
+    await seedSession({ slideIndex: 0, revealed: { habits: true } });
     await assertFails(getDoc(doc(colleague(), 'public/raceResults')));
   });
 
@@ -129,18 +129,18 @@ describe('race results reveal gate', () => {
   });
 
   it('allows a colleague after the reveal flag is set', async () => {
-    await seedSession({ slideIndex: 0, openActivity: null, revealed: { race: true } });
+    await seedSession({ slideIndex: 0, revealed: { race: true } });
     await assertSucceeds(getDoc(doc(colleague(), 'public/raceResults')));
   });
 
   it('denies a stranger and an unverified user even after the reveal', async () => {
-    await seedSession({ slideIndex: 0, openActivity: null, revealed: { race: true } });
+    await seedSession({ slideIndex: 0, revealed: { race: true } });
     await assertFails(getDoc(doc(as('x1', 'stranger@gmail.com'), 'public/raceResults')));
     await assertFails(getDoc(doc(as('u9', 'a@gcaa.org.tw', false), 'public/raceResults')));
   });
 
   it('lets the presenter read before the reveal and without a session document', async () => {
-    await seedSession({ slideIndex: 0, openActivity: null, revealed: { race: false } });
+    await seedSession({ slideIndex: 0, revealed: { race: false } });
     await assertSucceeds(getDoc(doc(presenter(), 'public/raceResults')));
     await seedSession(null);
     await assertSucceeds(getDoc(doc(presenter(), 'public/raceResults')));
