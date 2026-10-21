@@ -46,6 +46,27 @@ function Tally() {
   );
 }
 
+function Notes() {
+  const { entries } = useAllEntries<WarmupEntry>('warmup');
+  const notes = useMemo(
+    () => entries.map((e) => e.value.note).filter((note): note is string => typeof note === 'string' && note.trim() !== ''),
+    [entries],
+  );
+  if (notes.length === 0) return null;
+  return (
+    <section data-testid="warm-notes" className="flex flex-col gap-2">
+      <h3 className={`font-semibold ${wrapText}`}>{copy.warmNotesHeading}</h3>
+      <ul className="flex flex-col gap-2">
+        {notes.map((note, i) => (
+          <li key={i} className={`rounded-lg bg-slate-50 p-3 ${wrapText}`}>
+            {note}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function Warmup() {
   const { value, status, failed, error, save, retry } = useMyEntry<WarmupEntry>('warmup');
   const draft = useDraft<WarmupEntry>(value, EMPTY, save);
@@ -92,6 +113,7 @@ export default function Warmup() {
       />
       <SaveStatus status={status} failed={failed} error={error} hasValue={value !== null} onRetry={() => void retry()} />
       <Tally />
+      <Notes />
     </div>
   );
 }

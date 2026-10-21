@@ -193,6 +193,8 @@ test('warm-up saves marks and note, restores after reload, and the tally counts 
   const a = await openAs(browser, baseURL, ALICE, '#/');
   const b = await openAs(browser, baseURL, BOB, '#/');
   await expect(a.page.getByTestId('warm-tally')).toContainText('還沒有人填寫');
+  await expect(a.page.getByTestId('warm-notes')).toHaveCount(0);
+  await expect(a.page.getByText(copy.warmNotesHeading)).toHaveCount(0);
 
   await a.page.getByTestId('warm-row-press').getByRole('button', { name: '已經在用 AI' }).click();
   await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
@@ -210,6 +212,11 @@ test('warm-up saves marks and note, restores after reload, and the tally counts 
     .toBe(true);
   await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
 
+  const notes = b.page.getByTestId('warm-notes');
+  await expect(notes.getByRole('heading', { name: copy.warmNotesHeading })).toBeVisible();
+  await expect(notes.getByRole('listitem')).toHaveText(['逐字稿很好用']);
+  const noteText = await notes.innerText();
+  for (const forbidden of ['alice', 'bob', '@gcaa']) expect(noteText.toLowerCase()).not.toContain(forbidden);
   await expect(b.page.getByTestId('tally-press-using')).toHaveText('2');
   await expect(b.page.getByTestId('tally-visit-none')).toHaveText('1');
   await expect(b.page.getByTestId('tally-visit-using')).toHaveText('0');
