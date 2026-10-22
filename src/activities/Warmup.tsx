@@ -4,7 +4,7 @@ import { useAllEntries, useMyEntry } from '../entries/useEntries';
 import { aggregateWarmup } from '../lib/scoring';
 import type { WarmMark, WarmupEntry } from '../lib/types';
 import { useDraft } from './hooks';
-import { BoardFrame, buttonBase, LoadFailure, LoadingBlock, SaveStatus, wrapText } from './ui';
+import { BoardFrame, buttonBase, LoadFailure, LoadingBlock, optionButton, SaveStatus, wrapText } from './ui';
 
 const MARKS: WarmMark[] = ['using', 'worse', 'none'];
 const TYPE_IDS = copy.workTypes.map((t) => t.id);
@@ -31,7 +31,7 @@ function Tally() {
         </thead>
         <tbody>
           {copy.workTypes.map((t) => (
-            <tr key={t.id} className="border-t border-slate-200">
+            <tr key={t.id} className="border-t border-grid-soft">
               <td className={`p-1 ${wrapText}`}>{t.label}</td>
               {MARKS.map((m) => (
                 <td key={m} data-testid={`tally-${t.id}-${m}`} className="p-1 tabular-nums">
@@ -58,7 +58,7 @@ function Notes() {
       <h3 className={`font-semibold ${wrapText}`}>{copy.warmNotesHeading}</h3>
       <ul className="flex flex-col gap-2">
         {notes.map((note, i) => (
-          <li key={i} className={`rounded-lg bg-slate-50 p-3 ${wrapText}`}>
+          <li key={i} className={`rounded-lg bg-paper p-3 ${wrapText}`}>
             {note}
           </li>
         ))}
@@ -81,7 +81,7 @@ export default function Warmup() {
     <div className="flex flex-col gap-5">
       <ul className="flex flex-col gap-3">
         {copy.workTypes.map((t) => (
-          <li key={t.id} data-testid={`warm-row-${t.id}`} className="flex flex-col gap-2 rounded-lg border border-slate-200 p-3">
+          <li key={t.id} data-testid={`warm-row-${t.id}`} className="flex flex-col gap-2 rounded-lg border border-grid-soft p-3">
             <p className={`font-semibold ${wrapText}`}>{t.label}</p>
             <div className="flex flex-wrap gap-2">
               {MARKS.map((m) => {
@@ -92,7 +92,7 @@ export default function Warmup() {
                     type="button"
                     aria-pressed={selected}
                     disabled={busy}
-                    className={`${buttonBase} ${selected ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-slate-300 bg-white'}`}
+                    className={`${buttonBase} ${optionButton(selected)}`}
                     onClick={() => draft.change({ ...current, marks: { ...current.marks, [t.id]: m } }, true)}
                   >
                     {copy.warmMarks[m]}
@@ -108,7 +108,7 @@ export default function Warmup() {
         aria-label={copy.warmNotePlaceholder}
         placeholder={copy.warmNotePlaceholder}
         value={current.note}
-        className="w-full rounded-lg border-2 border-slate-300 px-3 py-2"
+        className="w-full rounded-lg border-2 border-grid px-3 py-2"
         onChange={(e) => draft.change({ ...current, note: e.target.value }, false)}
       />
       <SaveStatus status={status} failed={failed} error={error} hasValue={value !== null} onRetry={() => void retry()} />

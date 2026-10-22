@@ -34,7 +34,7 @@ export default function ExportCsv() {
       <button type="button" className={primaryButton} disabled={loading} onClick={download}>
         {ui.exportCsv}
       </button>
-      {loading && <span className="text-slate-600">{copy.states.loading}</span>}
+      {loading && <span className="text-ink-muted">{copy.states.loading}</span>}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { aggregateHabits } from '../lib/scoring';
 import type { Bin, HabitsEntry } from '../lib/types';
 import { setRevealed, useLiveSession } from '../session/useLiveSession';
 import type { ActivityProps } from './types';
-import { buttonBase, LoadFailure, LoadingBlock, primaryButton, SaveStatus, wrapText } from './ui';
+import { buttonBase, LoadFailure, LoadingBlock, optionButton, primaryButton, SaveStatus, wrapText } from './ui';
 
 const BINS: Bin[] = ['outdated', 'useful', 'new'];
 const CARD_IDS = copy.habitCards.map((c) => c.id);
@@ -27,7 +27,7 @@ function CardList({ mine, busy, revealed, counts, onPlace }: CardListProps) {
   return (
     <ul className="flex flex-col gap-3">
       {copy.habitCards.map((card: HabitCard) => (
-        <li key={card.id} data-testid={`habit-${card.id}`} className="flex flex-col gap-2 rounded-lg border border-slate-200 p-3">
+        <li key={card.id} data-testid={`habit-${card.id}`} className="flex flex-col gap-2 rounded-lg border border-grid-soft p-3">
           <p className={`font-semibold ${wrapText}`}>{card.text}</p>
           <div className="grid grid-cols-3 gap-2">
             {BINS.map((bin) => {
@@ -38,7 +38,7 @@ function CardList({ mine, busy, revealed, counts, onPlace }: CardListProps) {
                   type="button"
                   aria-pressed={selected}
                   disabled={busy}
-                  className={`${buttonBase} px-1 ${selected ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-slate-300 bg-white'}`}
+                  className={`${buttonBase} px-1 ${optionButton(selected)}`}
                   onClick={() => onPlace(card.id, bin)}
                 >
                   {copy.bins[bin]}
@@ -47,23 +47,23 @@ function CardList({ mine, busy, revealed, counts, onPlace }: CardListProps) {
             })}
           </div>
           {revealed && (
-            <div className="flex flex-col gap-2 border-t border-slate-200 pt-2">
+            <div className="flex flex-col gap-2 border-t border-grid-soft pt-2">
               {counts && (
                 <ul className="grid grid-cols-3 gap-2 text-sm">
                   {BINS.map((bin) => (
                     <li
                       key={bin}
                       data-testid={`split-${bin}`}
-                      className={`rounded p-2 ${bin === card.defaultBin ? 'bg-amber-50 ring-1 ring-amber-400' : 'bg-slate-50'}`}
+                      className={`rounded p-2 ${bin === card.defaultBin ? 'bg-mark/40 ring-1 ring-mark' : 'bg-paper'}`}
                     >
                       <span className={wrapText}>{copy.bins[bin]}</span>{' '}
                       <span className="font-semibold tabular-nums">{counts[card.id]?.[bin] ?? 0}</span>
-                      {bin === card.defaultBin && <span className="block text-xs text-amber-800">{ui.suggestedBin}</span>}
+                      {bin === card.defaultBin && <span className="block text-xs text-ink">{ui.suggestedBin}</span>}
                     </li>
                   ))}
                 </ul>
               )}
-              <p className={`text-slate-700 ${wrapText}`}>{card.example}</p>
+              <p className={`text-ink ${wrapText}`}>{card.example}</p>
             </div>
           )}
         </li>
@@ -112,7 +112,7 @@ function RevealControl() {
         {ui.reveal}
       </button>
       {error && (
-        <p role="alert" className={`text-sm text-red-700 ${wrapText}`}>
+        <p role="alert" className={`text-sm text-proof ${wrapText}`}>
           {copy.states.saveError}：{error}
         </p>
       )}

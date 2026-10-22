@@ -16,14 +16,14 @@ function StepExtra({ extra }: { extra: SetupStep['extra'] }) {
   const { deckUrl, meetUrl, meetPending } = copy.setup;
   if (extra === 'deck') {
     return (
-      <p className="text-base leading-relaxed text-slate-700" data-testid="setup-deck-link">
+      <p className="text-base leading-relaxed text-ink" data-testid="setup-deck-link">
         <ExternalLink href={deckUrl} />
       </p>
     );
   }
   if (extra === 'meet') {
     return (
-      <p className="text-base leading-relaxed text-slate-700" data-testid="setup-meet">
+      <p className="text-base leading-relaxed text-ink" data-testid="setup-meet">
         {meetUrl === '' ? meetPending : <ExternalLink href={meetUrl} />}
       </p>
     );
@@ -34,19 +34,19 @@ function StepExtra({ extra }: { extra: SetupStep['extra'] }) {
 export default function Setup() {
   const { title, intro, steps } = copy.setup;
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6">
-      <div className="mx-auto w-full max-w-2xl rounded-xl bg-white p-5 shadow sm:p-8">
-        <h1 className="mb-3 break-words text-2xl font-bold text-slate-900">{title}</h1>
-        <p className="mb-6 text-base leading-relaxed text-slate-700">{intro}</p>
-        <ol className="list-decimal space-y-6 pl-6 marker:font-semibold marker:text-emerald-700">
+    <main className="min-h-screen bg-paper px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-2xl rounded-xl bg-sheet p-5 border border-grid sm:p-8">
+        <h1 className="mb-3 break-words font-kai text-2xl font-bold text-ink">{title}</h1>
+        <p className="mb-6 text-base leading-relaxed text-ink">{intro}</p>
+        <ol className="list-decimal space-y-6 pl-6 marker:font-semibold marker:text-ink">
           {steps.map((step, index) => (
             <li key={step.title} className="pl-1" data-testid={`setup-step-${index}`}>
-              <h2 className="mb-2 break-words text-lg font-semibold text-slate-900" data-testid="setup-step-title">
+              <h2 className="mb-2 break-words text-lg font-semibold text-ink" data-testid="setup-step-title">
                 {step.title}
               </h2>
               <div className="space-y-2">
                 {step.body.map((paragraph) => (
-                  <p key={paragraph} className="break-words text-base leading-relaxed text-slate-700">
+                  <p key={paragraph} className="break-words text-base leading-relaxed text-ink">
                     {linkify(paragraph)}
                   </p>
                 ))}

@@ -17,7 +17,7 @@ function Board() {
     <BoardFrame testId="scenario-board" loading={loading} error={error} empty={whats.length === 0}>
       <ul className="flex flex-col gap-2">
         {whats.map((what, i) => (
-          <li key={i} className={`rounded-lg bg-slate-50 p-3 ${wrapText}`}>
+          <li key={i} className={`rounded-lg bg-paper p-3 ${wrapText}`}>
             {what}
           </li>
         ))}
@@ -45,7 +45,7 @@ export default function Scenario({ isPresenter }: ActivityProps) {
             <textarea
               rows={2}
               value={current[field]}
-              className="w-full rounded-lg border-2 border-slate-300 px-3 py-2"
+              className="w-full rounded-lg border-2 border-grid px-3 py-2"
               onChange={(e) => draft.change({ ...current, [field]: e.target.value }, false)}
             />
           </label>

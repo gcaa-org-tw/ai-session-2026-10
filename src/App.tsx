@@ -36,10 +36,10 @@ export default function App() {
     return <AuthGate>{(auth) => <Upload presenter={auth.presenter} />}</AuthGate>;
   }
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+    <main className="flex min-h-screen items-center justify-center bg-paper p-6">
       <div className="text-center">
-        <h1 className="mb-4 text-2xl font-bold">找不到這個頁面</h1>
-        <a className="text-emerald-700 underline" href="#/">
+        <h1 className="mb-4 font-kai text-2xl font-bold">找不到這個頁面</h1>
+        <a className="text-ink underline" href="#/">
           回到簡報
         </a>
       </div>

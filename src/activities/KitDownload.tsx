@@ -52,7 +52,7 @@ export default function KitDownload() {
       </button>
       {(kit.loading || building) && <LoadingBlock />}
       {problem && (
-        <p role="alert" data-testid="kit-error" className={`text-sm text-red-700 ${wrapText}`}>
+        <p role="alert" data-testid="kit-error" className={`text-sm text-proof ${wrapText}`}>
           {copy.race.downloadKit}：{problem}
         </p>
       )}

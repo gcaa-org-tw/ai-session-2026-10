@@ -8,15 +8,15 @@ export default function Follower() {
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow">
-          <h1 className="mb-2 text-xl font-bold">無法取得簡報進度</h1>
-          <p role="alert" className="mb-6 break-words text-red-700">
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid">
+          <h1 className="mb-2 font-kai text-xl font-bold">無法取得簡報進度</h1>
+          <p role="alert" className="mb-6 break-words text-proof">
             {error}
           </p>
           <button
             type="button"
-            className="rounded-lg bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
+            className="rounded-lg bg-ink px-5 py-3 font-semibold text-white hover:bg-ink/90"
             onClick={() => window.location.reload()}
           >
             重試
@@ -28,15 +28,15 @@ export default function Follower() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
         <div className="text-center">
           <div
             role="status"
             aria-label="載入中"
             data-testid="session-loading"
-            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700"
+            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-grid-soft border-t-ink"
           />
-          <p className="mt-4 text-slate-600">載入中…</p>
+          <p className="mt-4 text-ink-muted">載入中…</p>
         </div>
       </main>
     );
@@ -44,8 +44,8 @@ export default function Follower() {
 
   if (!state) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <p className="text-xl text-slate-600">等待主持人開始</p>
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <p className="text-xl text-ink-muted">等待主持人開始</p>
       </main>
     );
   }
@@ -55,10 +55,10 @@ export default function Follower() {
   if (!slide) return null;
 
   return (
-    <main className="min-h-screen bg-slate-50 p-3 sm:p-6">
+    <main className="min-h-screen bg-paper p-3 sm:p-6">
       <div className="mx-auto flex max-w-5xl flex-col gap-3">
         <SlideView slide={slide} index={index} />
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-ink-muted">
           {sectionLabels[slide.section]}，第 {index + 1}／{slides.length} 張
         </p>
       </div>

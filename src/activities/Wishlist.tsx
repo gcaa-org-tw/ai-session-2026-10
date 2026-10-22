@@ -37,7 +37,7 @@ function Board() {
     <BoardFrame testId="wish-board" loading={loading} error={error} empty={total === 0}>
       <div className="flex flex-col gap-3">
         {BINS.filter((bin) => groups[bin].length > 0).map((bin) => (
-          <section key={bin} data-testid={`wish-group-${bin}`} className="rounded-lg bg-slate-50 p-3">
+          <section key={bin} data-testid={`wish-group-${bin}`} className="rounded-lg bg-paper p-3">
             <h3 className="mb-1 font-semibold">{copy.wishBins[bin]}</h3>
             <ul className="flex flex-col gap-1">
               {groups[bin].map((text, i) => (
@@ -77,13 +77,13 @@ export default function Wishlist({ isPresenter }: ActivityProps) {
     <div className="flex flex-col gap-5">
       <ul className="flex flex-col gap-4">
         {items.map((item, slot) => (
-          <li key={slot} data-testid={`wish-item-${slot}`} className="flex flex-col gap-3 rounded-lg border border-slate-200 p-3">
+          <li key={slot} data-testid={`wish-item-${slot}`} className="flex flex-col gap-3 rounded-lg border border-grid-soft p-3">
             <textarea
               rows={2}
               aria-label={`${copy.slides.wishlist.title} ${slot + 1}`}
               placeholder={copy.wishPlaceholder}
               value={item.text}
-              className="w-full rounded-lg border-2 border-slate-300 px-3 py-2"
+              className="w-full rounded-lg border-2 border-grid px-3 py-2"
               onChange={(e) => update(slot, { text: e.target.value }, false)}
             />
             {QUESTIONS.map((q) => (
@@ -102,7 +102,7 @@ export default function Wishlist({ isPresenter }: ActivityProps) {
               <span className={wrapText}>{copy.optInLabel}</span>
             </label>
             {item.text.trim() !== '' && (
-              <p data-testid={`wish-bin-${slot}`} className="w-fit rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-900">
+              <p data-testid={`wish-bin-${slot}`} className="w-fit rounded-full bg-mark px-3 py-1 text-sm font-semibold text-ink">
                 {copy.wishBins[triageBin(item)]}
               </p>
             )}

@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f2f5f1;
+    color: #22313f;
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    line-height: 1.85;
+  }
+
+  :focus-visible {
+    outline: 3px solid #9dc4ae;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .mark-swipe,
+  .is-marked {
+    background-image: linear-gradient(#ffe36e, #ffe36e);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 0% 100%;
+    transition: background-size 180ms ease-out;
+  }
+
+  .is-marked {
+    background-size: 100% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

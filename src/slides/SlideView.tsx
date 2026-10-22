@@ -18,7 +18,7 @@ export default function SlideView({ slide, index, preview = false, isPresenter =
     <section
       data-slide-index={index}
       data-slide-id={slide.id}
-      className={`${frame} w-full rounded-xl bg-white shadow`}
+      className={`${frame} w-full rounded-xl bg-sheet border border-grid`}
     >
       {preview && slide.kind === 'activity' ? <Placeholder title={slide.title} body="互動活動" /> : slide.render({ isPresenter })}
     </section>

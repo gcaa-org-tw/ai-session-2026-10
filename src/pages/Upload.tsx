@@ -31,7 +31,7 @@ type Chosen = Partial<Record<PrivateDocId, File>>;
 const ABORTED = '另有檔案有誤，所有檔案都沒有寫入。';
 
 const primaryButton =
-  'rounded-lg bg-emerald-700 px-5 py-3 text-base font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50';
+  'rounded-lg bg-ink px-5 py-3 text-base font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50';
 
 async function readStored<T>(id: PrivateDocId): Promise<T | null> {
   const snap = await getDoc(doc(getFirebase().db, 'private', id));
@@ -89,7 +89,7 @@ function ResultLine({ id, result }: { id: PrivateDocId; result: Result | undefin
     <p
       data-testid={`result-${id}`}
       role={result.ok ? 'status' : 'alert'}
-      className={result.ok ? 'text-emerald-800' : 'break-words text-red-700'}
+      className={result.ok ? 'text-ok' : 'break-words text-proof'}
     >
       {result.ok ? '成功' : `失敗：${result.reason}`}
     </p>
@@ -103,10 +103,10 @@ export default function Upload({ presenter }: UploadProps) {
 
   if (!presenter) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow">
-          <h1 className="mb-4 text-2xl font-bold">此頁僅限主持人</h1>
-          <a className="text-emerald-700 underline" href="#/">
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid">
+          <h1 className="mb-4 font-kai text-2xl font-bold">此頁僅限主持人</h1>
+          <a className="text-ink underline" href="#/">
             回到簡報
           </a>
         </div>
@@ -155,10 +155,10 @@ export default function Upload({ presenter }: UploadProps) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 sm:p-8">
-      <div className="mx-auto flex max-w-xl flex-col gap-5 rounded-xl bg-white p-6 shadow">
-        <h1 className="text-2xl font-bold">上傳私密檔案</h1>
-        <p className="text-slate-600">選好檔案後一次寫入；只要有一個檔案有誤，全部都不會寫入。</p>
+    <main className="min-h-screen bg-paper p-4 sm:p-8">
+      <div className="mx-auto flex max-w-xl flex-col gap-5 rounded-xl bg-sheet p-6 border border-grid">
+        <h1 className="font-kai text-2xl font-bold">上傳私密檔案</h1>
+        <p className="text-ink-muted">選好檔案後一次寫入；只要有一個檔案有誤，全部都不會寫入。</p>
         {SLOTS.map((slot) => (
           <div key={slot.id} className="flex flex-col gap-1">
             <label htmlFor={`file-${slot.id}`} className="font-semibold">

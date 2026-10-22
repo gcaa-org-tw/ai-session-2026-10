@@ -5,15 +5,19 @@ import type { EntryStatus } from '../entries/useEntries';
 export const buttonBase =
   'rounded-lg border-2 px-3 py-2 text-base font-semibold disabled:cursor-not-allowed disabled:opacity-50';
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const optionButton = (selected: boolean): string =>
+  selected ? 'is-marked border-ink bg-sheet text-ink' : 'mark-swipe border-grid bg-sheet text-ink';
+
 export const primaryButton =
-  'rounded-lg bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50';
+  'rounded-lg bg-ink px-4 py-2 font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50';
 
 export const wrapText = '[overflow-wrap:anywhere]';
 
 export function LoadingBlock() {
   return (
-    <div role="status" className="flex items-center gap-2 text-slate-600">
-      <span aria-hidden="true" className="h-5 w-5 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700" />
+    <div role="status" className="flex items-center gap-2 text-ink-muted">
+      <span aria-hidden="true" className="h-5 w-5 animate-spin rounded-full border-4 border-grid-soft border-t-ink" />
       {copy.states.loading}
     </div>
   );
@@ -21,8 +25,8 @@ export function LoadingBlock() {
 
 export function LoadFailure({ message }: { message: string }) {
   return (
-    <div role="alert" className="flex flex-col items-start gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-red-800">
-      <p className="font-semibold">{copy.states.loadError}</p>
+    <div role="alert" className="flex flex-col items-start gap-2 rounded-lg border border-proof bg-sheet p-3 text-proof">
+      <p className="font-kai text-lg font-bold">{copy.states.loadError}</p>
       <p className={`text-sm ${wrapText}`}>{message}</p>
       <button type="button" className={primaryButton} onClick={() => window.location.reload()}>
         {copy.states.reload}
@@ -32,7 +36,7 @@ export function LoadFailure({ message }: { message: string }) {
 }
 
 export function EmptyNote() {
-  return <p className="text-slate-500">{copy.states.empty}</p>;
+  return <p className="text-ink-muted">{copy.states.empty}</p>;
 }
 
 interface BoardFrameProps {
@@ -73,7 +77,7 @@ export function SaveStatus({ status, failed, error, hasValue, onRetry }: SaveSta
   return (
     <div className="flex flex-col items-start gap-2">
       <div className="flex flex-wrap items-center gap-3">
-        <span data-testid="save-status" role="status" className={isError ? 'text-red-700' : 'text-slate-600'}>
+        <span data-testid="save-status" role="status" className={isError ? 'text-proof' : 'text-ok'}>
           {text}
         </span>
         {isError && (
@@ -83,7 +87,7 @@ export function SaveStatus({ status, failed, error, hasValue, onRetry }: SaveSta
         )}
       </div>
       {isError && error && (
-        <p role="alert" className={`text-sm text-red-700 ${wrapText}`}>
+        <p role="alert" className={`text-sm text-proof ${wrapText}`}>
           {error}
         </p>
       )}
@@ -100,7 +104,7 @@ interface NameErrorProps {
 export function NameError({ error, busy, onRetry }: NameErrorProps) {
   if (!error) return null;
   return (
-    <div role="alert" className="flex flex-col items-start gap-2 text-sm text-red-700">
+    <div role="alert" className="flex flex-col items-start gap-2 text-sm text-proof">
       <p className={wrapText}>
         {copy.states.saveError}：{error}
       </p>

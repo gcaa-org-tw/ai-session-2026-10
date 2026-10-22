@@ -20,7 +20,7 @@ function Averages({ results }: { results: RaceResults }) {
     <table className="w-full table-fixed border-collapse text-center">
       <caption className="mb-2 text-left font-semibold">{copy.race.averagePerEntry}</caption>
       <thead>
-        <tr className="text-sm text-slate-600">
+        <tr className="text-sm text-ink-muted">
           <th scope="col" className="w-1/4 p-1 text-left font-normal" />
           <th scope="col" className="p-1 font-normal">{copy.race.submittedCount}</th>
           {AVERAGES.map((field) => (
@@ -34,7 +34,7 @@ function Averages({ results }: { results: RaceResults }) {
         {ROLES.map((role) => {
           const score: RoleScore = results[role];
           return (
-            <tr key={role} className="border-t border-slate-200">
+            <tr key={role} className="border-t border-grid-soft">
               <th scope="row" className={`p-1 text-left font-semibold ${wrapText}`}>
                 {copy.roles[role]}
               </th>
@@ -61,7 +61,7 @@ function Planted({ results, release }: { results: RaceResults; release: MockRele
       <h3 className="font-semibold">{copy.race.perSentence}</h3>
       <ul className="flex flex-col gap-3">
         {results.planted.map((id) => (
-          <li key={id} data-testid={`race-planted-${id}`} className="flex flex-col gap-2 rounded-lg border border-slate-200 p-3">
+          <li key={id} data-testid={`race-planted-${id}`} className="flex flex-col gap-2 rounded-lg border border-grid-soft p-3">
             <p className={`font-semibold ${wrapText}`}>{texts.get(id) ?? id}</p>
             <p className="flex flex-wrap gap-x-4 gap-y-1">
               {ROLES.map((role) => (
@@ -73,7 +73,7 @@ function Planted({ results, release }: { results: RaceResults; release: MockRele
                 </span>
               ))}
             </p>
-            <p className={`text-slate-700 ${wrapText}`}>
+            <p className={`text-ink ${wrapText}`}>
               <span className="font-semibold">{copy.race.explanation}</span>：{results.explanations[id] ?? ''}
             </p>
           </li>

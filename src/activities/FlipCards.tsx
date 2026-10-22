@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { copy } from '../content/copy';
-import { EmptyNote, wrapText } from './ui';
+import { EmptyNote, optionButton, wrapText } from './ui';
 
 export default function FlipCards() {
   const [flipped, setFlipped] = useState<Record<string, boolean>>({});
@@ -17,17 +17,17 @@ export default function FlipCards() {
               type="button"
               data-testid={`concept-${m.id}`}
               aria-pressed={isBack}
-              className={`flex min-h-32 w-full flex-col items-start gap-1 rounded-lg border-2 p-4 text-left ${wrapText} ${isBack ? 'border-emerald-700 bg-emerald-50' : 'border-slate-300 bg-white'}`}
+              className={`flex min-h-32 w-full flex-col items-start gap-1 rounded-lg border-2 p-4 text-left ${wrapText} ${optionButton(isBack)}`}
               onClick={() => setFlipped((prev) => ({ ...prev, [m.id]: !isBack }))}
             >
               <span className="text-lg font-bold">{m.term}</span>
               {isBack ? (
                 <>
-                  <span className="text-sm text-slate-600">{m.gloss}</span>
+                  <span className="text-sm text-ink-muted">{m.gloss}</span>
                   <span>{m.back}</span>
                 </>
               ) : (
-                <span className="text-slate-700">{m.front}</span>
+                <span className="text-ink">{m.front}</span>
               )}
             </button>
           </li>

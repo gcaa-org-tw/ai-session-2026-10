@@ -11,7 +11,7 @@ interface PresenterProps {
 }
 
 const navButton =
-  'rounded-lg bg-emerald-700 px-5 py-3 text-base font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50';
+  'rounded-lg bg-ink px-5 py-3 text-base font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50';
 
 function errorText(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -24,20 +24,20 @@ function NotesPanel({ slideId }: { slideId: string }) {
   let body: ReactNode;
   if (error) {
     body = (
-      <p role="alert" className="break-words text-red-700">
+      <p role="alert" className="break-words text-proof">
         無法讀取備忘稿：{error}
       </p>
     );
   } else if (loading) {
-    body = <p className="text-slate-500">備忘稿載入中…</p>;
+    body = <p className="text-ink-muted">備忘稿載入中…</p>;
   } else if (!note) {
-    body = <p className="text-slate-500">這張沒有筆記</p>;
+    body = <p className="text-ink-muted">這張沒有筆記</p>;
   } else {
-    body = <p className="whitespace-pre-wrap text-slate-800">{note}</p>;
+    body = <p className="whitespace-pre-wrap text-ink">{note}</p>;
   }
 
   return (
-    <aside data-testid="notes-slot" className="min-h-32 rounded-xl border border-slate-300 bg-white p-4">
+    <aside data-testid="notes-slot" className="min-h-32 rounded-xl border border-grid bg-sheet p-4">
       {body}
     </aside>
   );
@@ -46,10 +46,10 @@ function NotesPanel({ slideId }: { slideId: string }) {
 export default function Presenter({ presenter }: PresenterProps) {
   if (!presenter) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow">
-          <h1 className="mb-4 text-2xl font-bold">此頁僅限主持人</h1>
-          <a className="text-emerald-700 underline" href="#/">
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid">
+          <h1 className="mb-4 font-kai text-2xl font-bold">此頁僅限主持人</h1>
+          <a className="text-ink underline" href="#/">
             回到簡報
           </a>
         </div>
@@ -103,10 +103,10 @@ function PresenterConsole() {
   const message = error ?? initError;
   if (message) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow">
-          <h1 className="mb-2 text-xl font-bold">無法取得簡報進度</h1>
-          <p role="alert" className="mb-6 break-words text-red-700">
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid">
+          <h1 className="mb-2 font-kai text-xl font-bold">無法取得簡報進度</h1>
+          <p role="alert" className="mb-6 break-words text-proof">
             {message}
           </p>
           <button type="button" className={navButton} onClick={() => window.location.reload()}>
@@ -119,8 +119,8 @@ function PresenterConsole() {
 
   if (loading || !state) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div role="status" aria-label="載入中" className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700" />
+      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+        <div role="status" aria-label="載入中" className="h-10 w-10 animate-spin rounded-full border-4 border-grid-soft border-t-ink" />
       </main>
     );
   }
@@ -130,13 +130,13 @@ function PresenterConsole() {
   if (!slide) return null;
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4">
+    <main className="min-h-screen bg-paper p-4">
       <div className="mx-auto flex max-w-6xl flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <p data-testid="section-label" className="text-lg font-semibold">
             {sectionLabels[slide.section]}
           </p>
-          <p data-testid="slide-counter" className="text-slate-600">
+          <p data-testid="slide-counter" className="text-ink-muted">
             第 {index + 1}／{slides.length} 張
           </p>
         </header>
@@ -147,11 +147,11 @@ function PresenterConsole() {
           </div>
           <div className="flex flex-col gap-4">
             <div data-testid="presenter-next">
-              <p className="mb-1 text-sm text-slate-500">下一張</p>
+              <p className="mb-1 text-sm text-ink-muted">下一張</p>
               {nextSlide ? (
                 <SlideView slide={nextSlide} index={index + 1} preview />
               ) : (
-                <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">最後一張</p>
+                <p className="rounded-xl border border-dashed border-grid p-6 text-center text-ink-muted">最後一張</p>
               )}
             </div>
             <NotesPanel slideId={slide.id} />
@@ -170,10 +170,10 @@ function PresenterConsole() {
           >
             下一張
           </button>
-          {writing && <span className="text-sm text-slate-500">儲存中…</span>}
+          {writing && <span className="text-sm text-ink-muted">儲存中…</span>}
         </div>
         {writeError && (
-          <p role="alert" className="text-red-700">
+          <p role="alert" className="text-proof">
             {writeError}
           </p>
         )}

@@ -20,14 +20,14 @@ function signInMessage(err: unknown): string {
 
 function Screen({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow sm:p-8">{children}</div>
+    <main className="flex min-h-screen items-center justify-center bg-paper p-6">
+      <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid sm:p-8">{children}</div>
     </main>
   );
 }
 
 const primaryButton =
-  'rounded-lg bg-emerald-700 px-5 py-3 text-base font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50';
+  'rounded-lg bg-ink px-5 py-3 text-base font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50';
 
 function SignedOutScreen() {
   const [pending, setPending] = useState(false);
@@ -47,13 +47,13 @@ function SignedOutScreen() {
 
   return (
     <Screen>
-      <h1 className="mb-2 text-2xl font-bold">AI 分享會</h1>
-      <p className="mb-6 text-slate-600">請使用綠色公民行動聯盟的帳號登入。</p>
+      <h1 className="mb-2 font-kai text-2xl font-bold">AI 分享會</h1>
+      <p className="mb-6 text-ink-muted">請使用綠色公民行動聯盟的帳號登入。</p>
       <button type="button" className={primaryButton} disabled={pending} onClick={handleSignIn}>
         {pending ? '登入中…' : '用 gcaa.org.tw 帳號登入'}
       </button>
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-700">
+        <p role="alert" className="mt-4 text-sm text-proof">
           {error}
         </p>
       )}
@@ -78,15 +78,15 @@ function DeniedScreen({ email }: { email: string }) {
 
   return (
     <Screen>
-      <h1 className="mb-2 text-2xl font-bold">這不是 gcaa.org.tw 帳號</h1>
-      <p className="mb-6 break-all text-slate-600">
+      <h1 className="mb-2 font-kai text-2xl font-bold">這不是 gcaa.org.tw 帳號</h1>
+      <p className="mb-6 break-all text-ink-muted">
         目前登入的是 <strong data-testid="denied-email">{email}</strong>，只有 gcaa.org.tw 的帳號可以進入。
       </p>
       <button type="button" className={primaryButton} disabled={pending} onClick={handleSwitch}>
         {pending ? '切換中…' : '換一個帳號'}
       </button>
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-700">
+        <p role="alert" className="mt-4 text-sm text-proof">
           {error}
         </p>
       )}
@@ -104,9 +104,9 @@ export default function AuthGate({ children }: AuthGateProps) {
           <div
             role="status"
             aria-label="載入中"
-            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-700"
+            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-grid-soft border-t-ink"
           />
-          <p className="mt-4 text-slate-600">載入中…</p>
+          <p className="mt-4 text-ink-muted">載入中…</p>
         </Screen>
       );
     case 'signedOut':
@@ -116,8 +116,8 @@ export default function AuthGate({ children }: AuthGateProps) {
     case 'error':
       return (
         <Screen>
-          <h1 className="mb-2 text-2xl font-bold">無法連線</h1>
-          <p role="alert" className="mb-6 break-words text-red-700">
+          <h1 className="mb-2 font-kai text-2xl font-bold">無法連線</h1>
+          <p role="alert" className="mb-6 break-words text-proof">
             {auth.message}
           </p>
           <button type="button" className={primaryButton} onClick={() => window.location.reload()}>

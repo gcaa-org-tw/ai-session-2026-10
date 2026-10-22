@@ -20,7 +20,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render(): ReactNode {
     if (this.state.error) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6" data-testid="error-boundary">
+        <main className="flex min-h-screen items-center justify-center bg-paper p-6" data-testid="error-boundary">
           <div className="w-full max-w-md">
             <LoadFailure message={this.state.error.message} />
           </div>

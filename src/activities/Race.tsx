@@ -11,7 +11,7 @@ import { publishRaceResults } from './raceHooks';
 import { useDraft } from './hooks';
 import KitDownload from './KitDownload';
 import type { ActivityProps } from './types';
-import { buttonBase, LoadFailure, LoadingBlock, primaryButton, SaveStatus, wrapText } from './ui';
+import { buttonBase, LoadFailure, LoadingBlock, optionButton, primaryButton, SaveStatus, wrapText } from './ui';
 
 const EMPTY: RaceEntry = { role: null, pairCode: '', findings: {} };
 const ROLES: Role[] = ['human', 'agent'];
@@ -38,10 +38,10 @@ function SentenceList({ release, entry, busy, locked, onJudge }: SentenceListPro
         const verdict = entry.findings[sentence.id];
         const open = openId === sentence.id;
         const tone = isFlag(verdict)
-          ? 'border-amber-500 bg-amber-50'
+          ? 'border-proof bg-sheet'
           : verdict === 'match'
-            ? 'border-emerald-600 bg-emerald-50'
-            : 'border-slate-200 bg-white';
+            ? 'border-ok bg-sheet'
+            : 'border-grid-soft bg-sheet';
         return (
           <li
             key={sentence.id}
@@ -59,7 +59,7 @@ function SentenceList({ release, entry, busy, locked, onJudge }: SentenceListPro
               >
                 {sentence.text}
               </button>
-              {verdict && <span className="shrink-0 text-sm font-semibold text-slate-700">{copy.verdicts[verdict]}</span>}
+              {verdict && <span className="shrink-0 text-sm font-semibold text-ink">{copy.verdicts[verdict]}</span>}
             </div>
             {open && !locked && (
               <div className="grid grid-cols-3 gap-2">
@@ -69,7 +69,7 @@ function SentenceList({ release, entry, busy, locked, onJudge }: SentenceListPro
                     type="button"
                     aria-pressed={verdict === v}
                     disabled={busy}
-                    className={`${buttonBase} px-1 ${verdict === v ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-slate-300 bg-white'}`}
+                    className={`${buttonBase} px-1 ${optionButton(verdict === v)}`}
                     onClick={() => {
                       onJudge(sentence.id, v);
                       setOpenId(null);
@@ -129,7 +129,7 @@ export function RaceReveal() {
   const ready = !loading && !error && !key.loading && !keyProblem;
 
   return (
-    <div className="flex flex-col items-start gap-2 rounded-lg border border-slate-200 p-3">
+    <div className="flex flex-col items-start gap-2 rounded-lg border border-grid-soft p-3">
       {error && <LoadFailure message={error} />}
       {keyProblem && <LoadFailure message={keyProblem} />}
       {!error && (loading ? <LoadingBlock /> : <Counts entries={values} />)}
@@ -137,7 +137,7 @@ export function RaceReveal() {
         {ui.reveal}
       </button>
       {writeError && (
-        <p role="alert" className={`text-sm text-red-700 ${wrapText}`}>
+        <p role="alert" className={`text-sm text-proof ${wrapText}`}>
           {copy.states.saveError}：{writeError}
         </p>
       )}
@@ -179,7 +179,7 @@ export default function Race({ isPresenter }: ActivityProps) {
               type="button"
               aria-pressed={current.role === role}
               disabled={busy}
-              className={`${buttonBase} ${current.role === role ? 'border-emerald-700 bg-emerald-50 text-emerald-900' : 'border-slate-300 bg-white'}`}
+              className={`${buttonBase} ${optionButton(current.role === role)}`}
               onClick={() => draft.change({ ...current, role }, true)}
             >
               {copy.roles[role]}
@@ -187,25 +187,25 @@ export default function Race({ isPresenter }: ActivityProps) {
           ))}
         </div>
         {locked && (
-          <p role="status" data-testid="race-pick-role" className={`text-amber-800 ${wrapText}`}>
+          <p role="status" data-testid="race-pick-role" className={`text-ink ${wrapText}`}>
             {copy.race.pickRoleFirst}
           </p>
         )}
       </div>
       <label className="flex flex-col gap-1">
         <span className="font-semibold">{copy.race.pairCodeLabel}</span>
-        <span className="text-sm text-slate-600">{copy.race.pairCodeHint}</span>
+        <span className="text-sm text-ink-muted">{copy.race.pairCodeHint}</span>
         <input
           type="text"
           maxLength={20}
           value={current.pairCode}
-          className="w-full max-w-xs rounded-lg border-2 border-slate-300 px-3 py-2"
+          className="w-full max-w-xs rounded-lg border-2 border-grid px-3 py-2"
           onChange={(e) => draft.change({ ...current, pairCode: e.target.value }, false)}
         />
       </label>
       <KitDownload />
       <h3 className={`text-lg font-bold ${wrapText}`}>{release.data.title}</h3>
-      <p className="text-slate-600">{copy.race.tapHint}</p>
+      <p className="text-ink-muted">{copy.race.tapHint}</p>
       <SaveStatus status={status} failed={failed} error={error} hasValue={value !== null} onRetry={() => void retry()} />
       <SentenceList release={release.data} entry={current} busy={busy} locked={locked} onJudge={judge} />
     </div>
