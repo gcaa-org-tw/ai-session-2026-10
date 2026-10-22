@@ -26,51 +26,53 @@ export interface SlideDef {
   id: SlideId;
   section: SectionId;
   title: string;
+  body: string[];
   kind: 'content' | 'activity';
   activity?: ActivityId;
+  Extra?: ActivityComponent;
   render: (ctx: SlideContext) => JSX.Element;
 }
 
 export const sectionLabels: Record<SectionId, string> = copy.sections;
 
-function content(id: SlideId, section: SectionId): SlideDef {
+function compose(
+  id: SlideId,
+  section: SectionId,
+  kind: SlideDef['kind'],
+  Extra?: ActivityComponent,
+  activityId?: ActivityId,
+): SlideDef {
   const { title, body } = copy.slides[id];
-  return { id, section, title, kind: 'content', render: () => createElement(SlideText, { title, body }) };
+  return {
+    id,
+    section,
+    title,
+    body,
+    kind,
+    activity: activityId,
+    Extra,
+    render: (ctx) =>
+      Extra
+        ? createElement(
+            'div',
+            { className: 'flex flex-col' },
+            createElement(SlideText, { title, body, compact: true }),
+            createElement('div', { className: 'px-4 pb-6 sm:px-8' }, createElement(Extra, ctx)),
+          )
+        : createElement(SlideText, { title, body }),
+  };
+}
+
+function content(id: SlideId, section: SectionId): SlideDef {
+  return compose(id, section, 'content');
 }
 
 function activity(id: SlideId, section: SectionId, component: ActivityComponent, activityId?: ActivityId): SlideDef {
-  const { title, body } = copy.slides[id];
-  return {
-    id,
-    section,
-    title,
-    kind: 'activity',
-    activity: activityId,
-    render: (ctx) =>
-      createElement(
-        'div',
-        { className: 'flex flex-col' },
-        createElement(SlideText, { title, body, compact: true }),
-        createElement('div', { className: 'px-4 pb-6 sm:px-8' }, createElement(component, ctx)),
-      ),
-  };
+  return compose(id, section, 'activity', component, activityId);
 }
 
-function contentWith(id: SlideId, section: SectionId, component: () => JSX.Element): SlideDef {
-  const { title, body } = copy.slides[id];
-  return {
-    id,
-    section,
-    title,
-    kind: 'content',
-    render: () =>
-      createElement(
-        'div',
-        { className: 'flex flex-col' },
-        createElement(SlideText, { title, body, compact: true }),
-        createElement('div', { className: 'px-4 pb-6 sm:px-8' }, createElement(component)),
-      ),
-  };
+function contentWith(id: SlideId, section: SectionId, component: ActivityComponent): SlideDef {
+  return compose(id, section, 'content', component);
 }
 
 export const slides: SlideDef[] = [

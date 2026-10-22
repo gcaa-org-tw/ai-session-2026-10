@@ -29,9 +29,57 @@
   .is-marked {
     background-size: 100% 100%;
   }
+
+  .cell-settle {
+    animation: cell-settle 260ms ease-out both;
+  }
+
+  .toc-current {
+    background-image: linear-gradient(transparent 62%, #ffe36e 62%);
+  }
+
+  .worksheet::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10rem;
+    height: 7rem;
+    border-top-right-radius: 7px;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, #dceae1 1px, transparent 1px),
+      linear-gradient(to bottom, #dceae1 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 80%);
+    mask-image: linear-gradient(to bottom left, #000, transparent 80%);
+  }
+}
+
+@keyframes cell-settle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {

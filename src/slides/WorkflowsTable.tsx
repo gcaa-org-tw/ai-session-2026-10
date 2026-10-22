@@ -37,7 +37,7 @@ export default function WorkflowsTable() {
       <ul data-testid="workflows-cards" className="flex flex-col gap-3 md:hidden">
         {rows.map((row) => (
           <li key={row.name} className="rounded-lg border border-grid-soft p-3">
-            <h2 className={`mb-2 text-lg font-semibold ${wrapText}`}>{row.name}</h2>
+            <h3 className={`mb-2 text-lg font-semibold ${wrapText}`}>{row.name}</h3>
             <dl className="flex flex-col gap-2">
               {COLUMNS.map((column) => (
                 <div key={column}>

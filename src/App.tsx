@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AuthGate from './auth/AuthGate';
 import Setup from './pages/Setup';
 import Tools from './pages/Tools';
 import Upload from './pages/Upload';
 import Follower from './slides/Follower';
+import Landing from './slides/Landing';
 import Presenter from './slides/Presenter';
+import { withViewTransition } from './slides/siteNav';
+import { parseSiteRoute } from './slides/siteRoute';
 
 function currentRoute(): string {
   const hash = window.location.hash.replace(/^#/, '');
@@ -13,9 +16,17 @@ function currentRoute(): string {
 
 export default function App() {
   const [route, setRoute] = useState(currentRoute);
+  const shown = useRef(route);
 
   useEffect(() => {
-    const onChange = () => setRoute(currentRoute());
+    const onChange = () => {
+      const next = currentRoute();
+      const from = parseSiteRoute(shown.current);
+      const to = parseSiteRoute(next);
+      shown.current = next;
+      if (from && to && from.section !== to.section) withViewTransition(() => setRoute(next));
+      else setRoute(next);
+    };
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
@@ -27,7 +38,11 @@ export default function App() {
     return <Tools />;
   }
   if (route === '/') {
-    return <AuthGate>{() => <Follower />}</AuthGate>;
+    return <AuthGate>{() => <Landing />}</AuthGate>;
+  }
+  const site = parseSiteRoute(route);
+  if (site) {
+    return <AuthGate>{() => <Follower section={site.section} slideId={site.slideId} />}</AuthGate>;
   }
   if (route === '/presenter') {
     return <AuthGate>{(auth) => <Presenter presenter={auth.presenter} />}</AuthGate>;

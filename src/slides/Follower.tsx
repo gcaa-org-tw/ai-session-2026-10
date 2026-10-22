@@ -1,67 +1,127 @@
-import { useLiveSession } from '../session/useLiveSession';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { SlideId } from '../content/copy';
+import { sectionNumerals, ui } from '../content/ui';
 import { clampSlide } from '../lib/slideNav';
-import SlideView from './SlideView';
+import type { SectionId } from '../lib/types';
+import { useLiveSession } from '../session/useLiveSession';
+import PresenterPill from './PresenterPill';
+import SectionPage from './SectionPage';
+import { goToSlide } from './siteNav';
+import { TocList, TocSheet } from './Toc';
+import { useScrollSpy } from './useScrollSpy';
 import { sectionLabels, slides } from './slides';
 
-export default function Follower() {
-  const { state, error, loading } = useLiveSession();
+const FOLLOW_KEY = 'follow-presenter';
 
-  if (error) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
-        <div className="w-full max-w-md rounded-xl bg-sheet p-6 text-center border border-grid">
-          <h1 className="mb-2 font-kai text-xl font-bold">無法取得簡報進度</h1>
-          <p role="alert" className="mb-6 break-words text-proof">
-            {error}
-          </p>
-          <button
-            type="button"
-            className="rounded-lg bg-ink px-5 py-3 font-semibold text-white hover:bg-ink/90"
-            onClick={() => window.location.reload()}
-          >
-            重試
-          </button>
-        </div>
-      </main>
-    );
+function readFollow(): boolean {
+  try {
+    return window.localStorage.getItem(FOLLOW_KEY) === 'true';
+  } catch {
+    return false;
   }
+}
 
-  if (loading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
-        <div className="text-center">
-          <div
-            role="status"
-            aria-label="載入中"
-            data-testid="session-loading"
-            className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-grid-soft border-t-ink"
-          />
-          <p className="mt-4 text-ink-muted">載入中…</p>
-        </div>
-      </main>
-    );
+function writeFollow(follow: boolean): void {
+  try {
+    window.localStorage.setItem(FOLLOW_KEY, String(follow));
+  } catch {
+    return;
   }
+}
 
-  if (!state) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-paper p-6">
-        <p className="text-xl text-ink-muted">等待主持人開始</p>
-      </main>
-    );
-  }
+interface SectionFrameProps {
+  section: SectionId;
+  slideId: SlideId | null;
+  session: ReturnType<typeof useLiveSession>;
+  presenterIndex: number | null;
+  follow: boolean;
+  onFollowChange: (follow: boolean) => void;
+}
 
-  const index = clampSlide(state.slideIndex, slides.length);
-  const slide = slides[index];
-  if (!slide) return null;
+function SectionFrame({ section, slideId, session, presenterIndex, follow, onFollowChange }: SectionFrameProps) {
+  const [activeId, setActiveId] = useState<SlideId | null>(slideId);
+  const [tocOpen, setTocOpen] = useState(false);
+  const opener = useRef<HTMLButtonElement>(null);
+  const closeToc = useCallback(() => setTocOpen(false), []);
+  useScrollSpy(section, activeId, setActiveId);
 
   return (
-    <main className="min-h-screen bg-paper p-3 sm:p-6">
-      <div className="mx-auto flex max-w-5xl flex-col gap-3">
-        <SlideView slide={slide} index={index} />
-        <p className="text-center text-sm text-ink-muted">
-          {sectionLabels[slide.section]}，第 {index + 1}／{slides.length} 張
-        </p>
-      </div>
-    </main>
+    <div className="mx-auto min-h-screen max-w-[76rem] lg:flex">
+      <header className="sticky top-0 z-30 border-b border-grid bg-paper lg:contents">
+        <div className="flex items-center gap-3 px-4 py-2 lg:hidden">
+          <button
+            ref={opener}
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={tocOpen}
+            className="rounded border border-grid bg-sheet px-3 py-1 text-sm font-semibold text-ink"
+            onClick={() => setTocOpen(true)}
+          >
+            {ui.toc}
+          </button>
+          <p className="min-w-0 truncate font-kai font-bold text-ink">
+            第{sectionNumerals[section]}段<span className="ml-3">{sectionLabels[section]}</span>
+          </p>
+        </div>
+        <PresenterPill
+          session={session}
+          presenterSlide={presenterIndex === null ? null : (slides[presenterIndex] ?? null)}
+          activeId={activeId}
+          follow={follow}
+          onFollowChange={onFollowChange}
+          onJump={(slide) => goToSlide(slide, section, false)}
+        />
+      </header>
+      <aside className="hidden lg:sticky lg:top-0 lg:block lg:h-screen lg:w-[17rem] lg:shrink-0 lg:overflow-y-auto lg:py-12 lg:pl-6 lg:pr-4">
+        <TocList section={section} activeId={activeId} />
+      </aside>
+      <TocSheet open={tocOpen} onClose={closeToc} opener={opener} section={section} activeId={activeId} />
+      <main className="min-w-0 flex-1 px-4 pb-40 pt-8 sm:px-8 lg:px-12 lg:pt-14">
+        <SectionPage section={section} slideId={slideId} />
+      </main>
+    </div>
+  );
+}
+
+interface FollowerProps {
+  section: SectionId;
+  slideId: SlideId | null;
+}
+
+export default function Follower({ section, slideId }: FollowerProps) {
+  const session = useLiveSession();
+  const [follow, setFollow] = useState(readFollow);
+  const sectionRef = useRef(section);
+  const presenterIndex = session.state ? clampSlide(session.state.slideIndex, slides.length) : null;
+
+  useEffect(() => {
+    sectionRef.current = section;
+  });
+
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+  }, []);
+
+  useEffect(() => {
+    if (!follow || presenterIndex === null) return;
+    const target = slides[presenterIndex];
+    if (target) goToSlide(target, sectionRef.current, true);
+  }, [follow, presenterIndex]);
+
+  function changeFollow(next: boolean) {
+    setFollow(next);
+    writeFollow(next);
+  }
+
+  return (
+    <SectionFrame
+      key={section}
+      section={section}
+      slideId={slideId}
+      session={session}
+      presenterIndex={presenterIndex}
+      follow={follow}
+      onFollowChange={changeFollow}
+    />
   );
 }
