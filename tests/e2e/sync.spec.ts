@@ -66,6 +66,38 @@ test('presenter advances, follower pill tracks it, reload keeps state', async ({
   await follower.context.close();
 });
 
+test('presenter jump select lists every slide by section and moves the follower pill', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.habits);
+  const presenter = await openAs(browser, baseURL, PRESENTER, '#/presenter');
+  const current = presenter.page.getByTestId('presenter-current').locator('[data-slide-index]');
+  await expect(current).toHaveAttribute('data-slide-index', String(SLIDE.habits));
+  const jump = presenter.page.getByRole('combobox', { name: '跳到' });
+  await expect(jump).toBeEnabled();
+  await expect(jump).toHaveValue(String(SLIDE.habits));
+  await expect(jump.locator('optgroup')).toHaveCount(7);
+  await expect(jump.locator('optgroup').nth(3)).toHaveAttribute('label', copy.sections[3]);
+  await expect(jump.locator('option')).toHaveCount(Object.keys(copy.slides).length);
+  await expect(jump.locator('option').nth(SLIDE.habits)).toHaveText(`${SLIDE.habits + 1}. ${copy.slides.habits.title}`);
+
+  const follower = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
+  const pill = follower.page.getByTestId('presenter-pill-text');
+  await expect(pill).toHaveText(`主持人正在：${copy.slides.habits.title}`);
+
+  await jump.selectOption(String(SLIDE.flowchart));
+  await expect(current).toHaveAttribute('data-slide-index', String(SLIDE.flowchart));
+  await expect(presenter.page.getByTestId('slide-counter')).toContainText(`第 ${SLIDE.flowchart + 1}／`);
+  await expect(jump).toHaveValue(String(SLIDE.flowchart));
+  await expect(pill).toHaveText(`主持人正在：${copy.slides.flowchart.title}`);
+
+  await jump.focus();
+  await presenter.page.keyboard.press('ArrowRight');
+  await presenter.page.waitForTimeout(500);
+  await expect(current).toHaveAttribute('data-slide-index', String(SLIDE.flowchart));
+
+  await presenter.context.close();
+  await follower.context.close();
+});
+
 test('presenter progress never moves the follower unless auto-follow is on', async ({ browser, baseURL }) => {
   await seedSession(SLIDE.habits);
   const follower = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');

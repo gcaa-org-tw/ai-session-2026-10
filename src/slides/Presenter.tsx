@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { ui } from '../content/ui';
 import { clampSlide } from '../lib/slideNav';
 import { usePrivateDoc } from '../private/usePrivateDoc';
 import { ensureLiveSession, setSlide, useLiveSession } from '../session/useLiveSession';
+import { sectionIds } from './siteRoute';
 import SlideView from './SlideView';
 import { sectionLabels, slides } from './slides';
 
@@ -133,7 +135,8 @@ function PresenterConsole() {
     <main className="min-h-screen bg-paper p-4">
       <div className="mx-auto flex max-w-6xl flex-col gap-4">
         <header className="flex flex-wrap items-center justify-between gap-2">
-          <p data-testid="section-label" className="text-lg font-semibold">
+          <p data-testid="section-label" className="flex items-center gap-2 text-lg font-semibold">
+            <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full bg-proof" />
             {sectionLabels[slide.section]}
           </p>
           <p data-testid="slide-counter" className="text-ink-muted">
@@ -158,7 +161,7 @@ function PresenterConsole() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button type="button" className={navButton} disabled={writing || index === 0} onClick={() => void go(index - 1)}>
             上一張
           </button>
@@ -170,6 +173,30 @@ function PresenterConsole() {
           >
             下一張
           </button>
+          <div className="flex min-w-0 items-center gap-2">
+            <label htmlFor="jump-to" className="text-ink-muted">
+              {ui.jumpTo}
+            </label>
+            <select
+              id="jump-to"
+              value={index}
+              disabled={writing}
+              className="min-w-0 max-w-full rounded-lg border-2 border-grid bg-sheet px-3 py-2 text-base text-ink disabled:cursor-not-allowed disabled:opacity-50"
+              onChange={(e) => void go(Number(e.target.value))}
+            >
+              {sectionIds.map((section) => (
+                <optgroup key={section} label={sectionLabels[section]}>
+                  {slides.map((s, i) =>
+                    s.section === section ? (
+                      <option key={s.id} value={i}>
+                        {`${i + 1}. ${s.title}`}
+                      </option>
+                    ) : null,
+                  )}
+                </optgroup>
+              ))}
+            </select>
+          </div>
           {writing && <span className="text-sm text-ink-muted">儲存中…</span>}
         </div>
         {writeError && (

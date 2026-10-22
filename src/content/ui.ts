@@ -20,6 +20,7 @@ export const ui = {
   presenterError: '無法取得主持人進度',
   reloadPage: '重試',
   presenterStatus: '主持人進度',
+  jumpTo: '跳到',
 };
 
 export const sectionNumerals: Record<SectionId, string> = {
