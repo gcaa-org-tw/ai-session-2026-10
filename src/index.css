@@ -60,6 +60,13 @@
     animation: bar-grow 400ms ease-out;
   }
 
+  .title-fill {
+    --pitch: calc(2.5rem - 1px);
+    border: 1px solid #9dc4ae;
+    background-image: repeating-linear-gradient(to right, #9dc4ae 0 1px, transparent 1px var(--pitch));
+    background-origin: border-box;
+  }
+
   .cell-settle {
     animation: cell-settle 260ms ease-out both;
   }
@@ -83,6 +90,12 @@
     background-size: 24px 24px;
     -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 80%);
     mask-image: linear-gradient(to bottom left, #000, transparent 80%);
+  }
+}
+
+@media (min-width: 640px) {
+  .title-fill {
+    --pitch: calc(3.5rem - 1px);
   }
 }
 

@@ -12,17 +12,18 @@ const STAGGER_MS = 45;
 
 function SectionTitle({ label }: { label: string }) {
   return (
-    <h1 aria-label={label} className="flex flex-wrap pl-px pt-px">
+    <h1 aria-label={label} className="flex max-w-[40rem] flex-wrap overflow-hidden pl-px pt-px">
       {Array.from(label).map((char, i) => (
         <span
           key={i}
           aria-hidden="true"
           style={{ animationDelay: `${Math.min(i, MAX_STAGGER) * STAGGER_MS}ms` }}
-          className="cell-settle -ml-px -mt-px flex h-8 w-8 items-center justify-center border border-grid font-kai text-xl font-bold text-ink sm:h-11 sm:w-11 sm:text-[1.75rem]"
+          className="cell-settle -ml-px -mt-px flex h-10 w-10 items-center justify-center border border-grid font-kai text-2xl font-bold text-ink sm:h-14 sm:w-14 sm:text-4xl"
         >
           {char}
         </span>
       ))}
+      <span aria-hidden="true" className="title-fill -ml-px -mt-px h-10 min-w-0 flex-1 sm:h-14" />
     </h1>
   );
 }

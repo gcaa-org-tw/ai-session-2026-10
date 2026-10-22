@@ -72,16 +72,30 @@ test('the pill jump crosses into another section when the presenter is elsewhere
   await context.close();
 });
 
-test('the pill sits bottom-right on a wide window and inside the top bar on a narrow one', async ({ browser, baseURL }) => {
+test('the pill sits at the bottom of the contents sidebar on a wide window, never over the main column, and inside the top bar on a narrow one', async ({ browser, baseURL }) => {
   await seedSession(SLIDE.habits);
   const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
   const pill = page.getByTestId('presenter-pill');
   await expect(pill).toBeVisible();
-  const wide = await pill.boundingBox();
-  const viewport = page.viewportSize();
-  if (!wide || !viewport) throw new Error('missing geometry');
-  expect(wide.x + wide.width).toBeGreaterThan(viewport.width - 40);
-  expect(wide.y + wide.height).toBeGreaterThan(viewport.height - 40);
+  const sidebar = page.locator('aside').filter({ has: toc(page) });
+  await expect(sidebar.getByTestId('presenter-pill')).toBeVisible();
+  for (const width of [1024, 1180, 1440]) {
+    await page.setViewportSize({ width, height: 800 });
+    await expect(pill).toBeVisible();
+    const box = await pill.boundingBox();
+    const side = await sidebar.boundingBox();
+    const main = await page.locator('main').boundingBox();
+    if (!box || !side || !main) throw new Error('missing geometry');
+    expect(box.x, `x at ${width}`).toBeGreaterThanOrEqual(side.x);
+    expect(box.x + box.width, `right edge at ${width}`).toBeLessThanOrEqual(side.x + side.width);
+    expect(box.x + box.width, `clear of main at ${width}`).toBeLessThanOrEqual(main.x);
+    expect(box.width, `fits content at ${width}`).toBeLessThan(side.width);
+    expect(box.y + box.height, `bottom at ${width}`).toBeGreaterThan(800 - 80);
+    await page.evaluate(() => window.scrollTo(0, 900));
+    const scrolled = await pill.boundingBox();
+    expect(scrolled?.y).toBe(box.y);
+    await page.evaluate(() => window.scrollTo(0, 0));
+  }
 
   await page.setViewportSize({ width: 640, height: 800 });
   await expect(pill).toBeVisible();
@@ -255,13 +269,23 @@ test('footers link to the neighbouring sections', async ({ browser, baseURL }) =
   await context.close();
 });
 
-test('the section title sets one character per grid cell and animates once, unless motion is reduced', async ({ browser, baseURL }) => {
+test('the section title sets one character per grid cell, runs on as empty cells to the column edge, and animates once, unless motion is reduced', async ({ browser, baseURL }) => {
   const { context, page } = await openAs(browser, baseURL, ALICE, '#/s/3');
   const heading = await sectionHeading(page, 3);
-  const cells = heading.locator('span[aria-hidden="true"]');
+  const cells = heading.locator('.cell-settle');
   await expect(cells).toHaveCount(Array.from(copy.sections[3]).length);
+  await expect(heading.locator('span:not([aria-hidden="true"])')).toHaveCount(0);
   const sizes = await cells.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width));
-  for (const width of sizes) expect(width).toBeCloseTo(44, 0);
+  for (const width of sizes) expect(width).toBeCloseTo(56, 0);
+  const fill = heading.locator('.title-fill');
+  const lastCell = await cells.last().boundingBox();
+  const strip = await fill.boundingBox();
+  const box = await heading.boundingBox();
+  if (!lastCell || !strip || !box) throw new Error('missing geometry');
+  expect(strip.x).toBeLessThanOrEqual(lastCell.x + lastCell.width);
+  expect(strip.x + strip.width).toBeCloseTo(box.x + box.width, 0);
+  expect(box.width).toBeCloseTo(640, 0);
+  expect(strip.height).toBeCloseTo(56, 0);
   const motion = await cells.evaluateAll((els) =>
     els.map((el) => {
       const style = getComputedStyle(el);
@@ -271,10 +295,12 @@ test('the section title sets one character per grid cell and animates once, unle
   expect(motion.map((m) => m.name)).toEqual(motion.map(() => 'cell-settle'));
   expect(motion.map((m) => m.delay)).toEqual(['0s', '0.045s', '0.09s', '0.135s', '0.18s', '0.225s']);
   expect(motion[0]?.duration).toBe('0.26s');
+  expect(await fill.evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
 
   await page.setViewportSize({ width: 500, height: 800 });
   const narrow = await cells.first().evaluate((el) => el.getBoundingClientRect().width);
-  expect(narrow).toBeCloseTo(32, 0);
+  expect(narrow).toBeCloseTo(40, 0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('#/s/4');

@@ -9,6 +9,7 @@ import SectionPage from './SectionPage';
 import { goToSlide } from './siteNav';
 import { TocList, TocSheet } from './Toc';
 import { useScrollSpy } from './useScrollSpy';
+import { useWideLayout } from './useWideLayout';
 import { sectionLabels, slides } from './slides';
 
 const FOLLOW_KEY = 'follow-presenter';
@@ -43,7 +44,18 @@ function SectionFrame({ section, slideId, session, presenterIndex, follow, onFol
   const [tocOpen, setTocOpen] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
   const closeToc = useCallback(() => setTocOpen(false), []);
+  const wide = useWideLayout();
   useScrollSpy(section, activeId, setActiveId);
+  const pill = (
+    <PresenterPill
+      session={session}
+      presenterSlide={presenterIndex === null ? null : (slides[presenterIndex] ?? null)}
+      activeId={activeId}
+      follow={follow}
+      onFollowChange={onFollowChange}
+      onJump={(slide) => goToSlide(slide, section, false)}
+    />
+  );
 
   return (
     <div className="mx-auto min-h-screen max-w-[76rem] lg:flex">
@@ -63,17 +75,11 @@ function SectionFrame({ section, slideId, session, presenterIndex, follow, onFol
             第{sectionNumerals[section]}段<span className="ml-3">{sectionLabels[section]}</span>
           </p>
         </div>
-        <PresenterPill
-          session={session}
-          presenterSlide={presenterIndex === null ? null : (slides[presenterIndex] ?? null)}
-          activeId={activeId}
-          follow={follow}
-          onFollowChange={onFollowChange}
-          onJump={(slide) => goToSlide(slide, section, false)}
-        />
+        {!wide && pill}
       </header>
-      <aside className="hidden lg:sticky lg:top-0 lg:block lg:h-screen lg:w-[17rem] lg:shrink-0 lg:overflow-y-auto lg:py-12 lg:pl-6 lg:pr-4">
+      <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[17rem] lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:py-12 lg:pl-6 lg:pr-4">
         <TocList section={section} activeId={activeId} />
+        {wide && pill}
       </aside>
       <TocSheet open={tocOpen} onClose={closeToc} opener={opener} section={section} activeId={activeId} />
       <main className="min-w-0 flex-1 px-4 pb-40 pt-8 sm:px-8 lg:px-12 lg:pt-14">

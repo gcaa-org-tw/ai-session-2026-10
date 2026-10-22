@@ -13,7 +13,7 @@ interface PresenterPillProps {
 }
 
 const frame =
-  'flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pb-2 text-sm lg:fixed lg:bottom-4 lg:right-4 lg:z-20 lg:w-72 lg:rounded-lg lg:border lg:border-grid lg:bg-sheet lg:p-3';
+  'flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pb-2 text-sm lg:sticky lg:bottom-4 lg:mt-auto lg:w-fit lg:max-w-full lg:rounded-lg lg:border lg:border-grid lg:bg-sheet lg:p-3';
 
 const smallButton = 'rounded border border-grid bg-sheet px-3 py-1 text-sm font-semibold text-ink hover:bg-grid-soft';
 
