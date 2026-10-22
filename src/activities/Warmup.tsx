@@ -61,9 +61,9 @@ function Notes() {
   return (
     <section data-testid="warm-notes" className="flex flex-col gap-2">
       <h3 className={`font-semibold ${wrapText}`}>{copy.warmNotesHeading}</h3>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col">
         {notes.map((note, i) => (
-          <li key={i} className={`rounded-lg bg-paper p-3 ${wrapText}`}>
+          <li key={i} className={`border-t border-dashed border-grid-soft py-2 first:border-t-0 ${wrapText}`}>
             {note}
           </li>
         ))}

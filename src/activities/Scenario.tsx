@@ -15,9 +15,9 @@ function Board() {
   const whats = useMemo(() => entries.map((e) => e.value.what).filter((w) => w.trim() !== ''), [entries]);
   return (
     <BoardFrame testId="scenario-board" loading={loading} error={error} empty={whats.length === 0}>
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col">
         {whats.map((what, i) => (
-          <li key={i} className={`rounded-lg bg-paper p-3 ${wrapText}`}>
+          <li key={i} className={`border-t border-dashed border-grid-soft py-2 first:border-t-0 ${wrapText}`}>
             {what}
           </li>
         ))}

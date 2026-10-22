@@ -35,9 +35,9 @@ function Board() {
 
   return (
     <BoardFrame testId="wish-board" loading={loading} error={error} empty={total === 0}>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col">
         {BINS.filter((bin) => groups[bin].length > 0).map((bin) => (
-          <section key={bin} data-testid={`wish-group-${bin}`} className="rounded-lg bg-paper p-3">
+          <section key={bin} data-testid={`wish-group-${bin}`} className="border-t border-dashed border-grid-soft py-3 first:border-t-0">
             <h3 className="mb-1 font-semibold">{copy.wishBins[bin]}</h3>
             <ul className="flex flex-col gap-1">
               {groups[bin].map((text, i) => (
