@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { copy } from '../content/copy';
-import { buttonBase, EmptyNote, optionButton, wrapText } from './ui';
+import { buttonBase, EmptyNote, wrapText } from './ui';
 
 const labelOf = new Map(copy.flowchart.map((s) => [s.id, s.label]));
 
@@ -10,22 +10,22 @@ export default function Flowchart() {
   if (copy.flowchart.length === 0) return <EmptyNote />;
 
   return (
-    <ol className="flex flex-col gap-2">
+    <ol className="flex flex-col">
       {copy.flowchart.map((step) => {
         const isSelected = selected === step.id;
         return (
-          <li key={step.id} className="flex min-w-0 flex-col gap-2">
+          <li key={step.id} className="flex min-w-0 flex-col gap-2 border-t border-dashed border-grid-soft py-2 first:border-t-0 first:pt-0 last:pb-0">
             <button
               type="button"
               data-testid={`flow-${step.id}`}
               aria-pressed={isSelected}
-              className={`${buttonBase} w-full text-left ${wrapText} ${optionButton(isSelected)}`}
+              className={`w-full rounded px-2 py-2 text-left font-semibold ${wrapText} ${isSelected ? 'is-marked' : 'mark-swipe hover:bg-grid-soft'}`}
               onClick={() => setSelected(step.id)}
             >
               {step.label}
             </button>
             {isSelected && (
-              <div data-testid="flow-detail" className="flex flex-col gap-2 rounded-lg bg-paper p-3">
+              <div data-testid="flow-detail" className="flex flex-col gap-2 border-l-2 border-grid pl-3">
                 <p className={wrapText}>{step.detail}</p>
                 {step.next.length > 0 && (
                   <div className="flex flex-col gap-2">

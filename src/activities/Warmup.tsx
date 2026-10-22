@@ -4,11 +4,15 @@ import { useAllEntries, useMyEntry } from '../entries/useEntries';
 import { aggregateWarmup, toggleChoice } from '../lib/scoring';
 import type { WarmMark, WarmupEntry } from '../lib/types';
 import { useDraft } from './hooks';
-import { BoardFrame, buttonBase, LoadFailure, LoadingBlock, optionButton, SaveStatus, wrapText } from './ui';
+import { BoardFrame, buttonBase, CountBar, LoadFailure, LoadingBlock, optionButton, SaveStatus, wrapText } from './ui';
 
 const MARKS: WarmMark[] = ['using', 'worse', 'none'];
 const TYPE_IDS = copy.workTypes.map((t) => t.id);
 const EMPTY: WarmupEntry = { marks: {}, note: '' };
+
+function rowTotal(counts: ReturnType<typeof aggregateWarmup>, typeId: string): number {
+  return MARKS.reduce((sum, m) => sum + (counts[typeId]?.[m] ?? 0), 0);
+}
 
 function Tally() {
   const { entries, loading, error } = useAllEntries<WarmupEntry>('warmup');
@@ -36,6 +40,7 @@ function Tally() {
               {MARKS.map((m) => (
                 <td key={m} data-testid={`tally-${t.id}-${m}`} className="p-1 tabular-nums">
                   {counts[t.id]?.[m] ?? 0}
+                  <CountBar count={counts[t.id]?.[m] ?? 0} total={rowTotal(counts, t.id)} />
                 </td>
               ))}
             </tr>
@@ -79,9 +84,13 @@ export default function Warmup() {
 
   return (
     <div className="flex flex-col gap-5">
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col">
         {copy.workTypes.map((t) => (
-          <li key={t.id} data-testid={`warm-row-${t.id}`} className="flex flex-col gap-2 rounded-lg border border-grid-soft p-3">
+          <li
+            key={t.id}
+            data-testid={`warm-row-${t.id}`}
+            className="flex flex-col gap-2 border-t border-dashed border-grid-soft py-4 first:border-t-0 first:pt-0 last:pb-0"
+          >
             <p className={`font-semibold ${wrapText}`}>{t.label}</p>
             <div className="flex flex-wrap gap-2">
               {MARKS.map((m) => {

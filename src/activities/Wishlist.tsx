@@ -75,9 +75,13 @@ export default function Wishlist({ isPresenter }: ActivityProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col">
         {items.map((item, slot) => (
-          <li key={slot} data-testid={`wish-item-${slot}`} className="flex flex-col gap-3 rounded-lg border border-grid-soft p-3">
+          <li
+            key={slot}
+            data-testid={`wish-item-${slot}`}
+            className="flex flex-col gap-3 border-t border-dashed border-grid-soft py-5 first:border-t-0 first:pt-0 last:pb-0"
+          >
             <textarea
               rows={2}
               aria-label={`${copy.slides.wishlist.title} ${slot + 1}`}

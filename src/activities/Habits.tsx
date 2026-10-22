@@ -8,12 +8,16 @@ import { aggregateHabits, toggleChoice } from '../lib/scoring';
 import type { Bin, HabitsEntry } from '../lib/types';
 import { setRevealed, useLiveSession } from '../session/useLiveSession';
 import type { ActivityProps } from './types';
-import { buttonBase, LoadFailure, LoadingBlock, optionButton, primaryButton, SaveStatus, wrapText } from './ui';
+import { buttonBase, CountBar, LoadFailure, LoadingBlock, optionButton, primaryButton, SaveStatus, wrapText } from './ui';
 
 const BINS: Bin[] = ['outdated', 'useful', 'new'];
 const CARD_IDS = copy.habitCards.map((c) => c.id);
 
 type Counts = Record<string, Record<Bin, number>>;
+
+function placedTotal(counts: Counts, cardId: string): number {
+  return BINS.reduce((sum, bin) => sum + (counts[cardId]?.[bin] ?? 0), 0);
+}
 
 interface CardListProps {
   mine: HabitsEntry | null;
@@ -25,9 +29,9 @@ interface CardListProps {
 
 function CardList({ mine, busy, revealed, counts, onPlace }: CardListProps) {
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col">
       {copy.habitCards.map((card: HabitCard) => (
-        <li key={card.id} data-testid={`habit-${card.id}`} className="flex flex-col gap-2 rounded-lg border border-grid-soft p-3">
+        <li key={card.id} data-testid={`habit-${card.id}`} className="flex flex-col gap-2 border-t border-dashed border-grid-soft py-4 first:border-t-0 first:pt-0 last:pb-0">
           <p className={`font-semibold ${wrapText}`}>{card.text}</p>
           <div className="grid grid-cols-3 gap-2">
             {BINS.map((bin) => {
@@ -58,6 +62,7 @@ function CardList({ mine, busy, revealed, counts, onPlace }: CardListProps) {
                     >
                       <span className={wrapText}>{copy.bins[bin]}</span>{' '}
                       <span className="font-semibold tabular-nums">{counts[card.id]?.[bin] ?? 0}</span>
+                      <CountBar count={counts[card.id]?.[bin] ?? 0} total={placedTotal(counts, card.id)} />
                       {bin === card.defaultBin && <span className="block text-xs text-ink">{ui.suggestedBin}</span>}
                     </li>
                   ))}

@@ -14,6 +14,15 @@ export const primaryButton =
 
 export const wrapText = '[overflow-wrap:anywhere]';
 
+export function CountBar({ count, total }: { count: number; total: number }) {
+  const share = total === 0 ? 0 : count / total;
+  return (
+    <span aria-hidden="true" className="mt-1 block h-1 w-full overflow-hidden rounded-full bg-grid-soft">
+      <span className="count-bar block h-full w-full bg-ink" style={{ transform: `scaleX(${share})` }} />
+    </span>
+  );
+}
+
 export function LoadingBlock() {
   return (
     <div role="status" className="flex items-center gap-2 text-ink-muted">

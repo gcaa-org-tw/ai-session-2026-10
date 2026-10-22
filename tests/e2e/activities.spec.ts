@@ -59,6 +59,9 @@ test('two users place habit cards, presenter reveals, both see the room split an
     await expect(habit(page, 'h1').getByTestId('split-useful')).toContainText('0');
     await expect(habit(page, 'h7').getByTestId('split-useful')).toContainText('1');
     await expect(habit(page, 'h7').getByTestId('split-new')).toContainText('1');
+    await expect(habit(page, 'h1').getByTestId('split-outdated').locator('.count-bar')).toHaveAttribute('style', /scaleX\(1\)/);
+    await expect(habit(page, 'h1').getByTestId('split-useful').locator('.count-bar')).toHaveAttribute('style', /scaleX\(0\)/);
+    await expect(habit(page, 'h7').getByTestId('split-useful').locator('.count-bar')).toHaveAttribute('style', /scaleX\(0\.5\)/);
     await expect(habit(page, 'h1').getByText('寫拜會說帖前先指定角色')).toBeVisible();
     await expect(habit(page, 'h1').getByText('建議分類')).toBeVisible();
     await expect(habit(page, 'h1').getByTestId('split-outdated').getByText('建議分類')).toBeVisible();
@@ -260,6 +263,8 @@ test('warm-up saves marks and note, restores after reload, and the tally counts 
   await expect(b.page.getByTestId('tally-press-using')).toHaveText('2');
   await expect(b.page.getByTestId('tally-visit-none')).toHaveText('1');
   await expect(b.page.getByTestId('tally-visit-using')).toHaveText('0');
+  await expect(b.page.getByTestId('tally-press-using').locator('.count-bar')).toHaveAttribute('style', /scaleX\(1\)/);
+  await expect(b.page.getByTestId('tally-press-worse').locator('.count-bar')).toHaveAttribute('style', /scaleX\(0\)/);
 
   await a.page.reload();
   await expect(a.page.getByTestId('warm-row-press').getByRole('button', { name: '已經在用 AI' })).toHaveAttribute('aria-pressed', 'true');
@@ -274,13 +279,25 @@ test('concept cards flip on tap and flip back', async ({ browser, baseURL }) => 
   await seedSession(SLIDE.concepts);
   const a = await openAs(browser, baseURL, ALICE, '#/');
   const card = a.page.getByTestId('concept-mcp');
-  await expect(card).toContainText('萬用轉接頭');
-  await expect(card).not.toContainText('接上法規與判決資料庫後');
+  const visible = { useInnerText: true };
+  await expect(card).toContainText('萬用轉接頭', visible);
+  await expect(card).not.toContainText('接上法規與判決資料庫後', visible);
+  await expect(card).toHaveAttribute('aria-pressed', 'false');
   await expect(a.page.getByTestId('concepts').getByRole('button')).toHaveCount(8);
+  const inner = card.locator('.flip-inner');
+  expect(await inner.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0.3s');
+  expect(await inner.evaluate((el) => getComputedStyle(el).transform)).toBe('none');
   await card.click();
-  await expect(card).toContainText('接上法規與判決資料庫後');
+  await expect.poll(() => inner.evaluate((el) => getComputedStyle(el).transform)).toMatch(/^matrix3d\(-1,/);
+  await expect(card).toContainText('接上法規與判決資料庫後', visible);
+  await expect(card).toHaveAttribute('aria-pressed', 'true');
+  await expect(card.locator('[aria-hidden="true"]')).toHaveCount(1);
+  await expect(card.locator('[aria-hidden="true"]')).not.toContainText('接上法規與判決資料庫後');
+  await expect(card).toHaveAccessibleName(/接上法規與判決資料庫後/);
   await card.click();
-  await expect(card).not.toContainText('接上法規與判決資料庫後');
+  await expect(card).not.toContainText('接上法規與判決資料庫後', visible);
+  await expect(card).toHaveAttribute('aria-pressed', 'false');
+  await expect(card.locator('[aria-hidden="true"]')).toContainText('接上法規與判決資料庫後');
   expect(await adminListIds('entries/habits/users')).toEqual([]);
   await a.context.close();
 });

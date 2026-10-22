@@ -30,6 +30,36 @@
     background-size: 100% 100%;
   }
 
+  .flip-card {
+    perspective: 900px;
+  }
+
+  .flip-inner {
+    transform-style: preserve-3d;
+    transition: transform 300ms ease-in-out;
+  }
+
+  .flip-inner.is-flipped {
+    transform: rotateY(180deg);
+  }
+
+  .flip-face {
+    grid-area: 1 / 1;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: visibility 0s linear 150ms;
+  }
+
+  .flip-back {
+    transform: rotateY(180deg);
+  }
+
+  .count-bar {
+    transform-origin: left;
+    transition: transform 400ms ease-out;
+    animation: bar-grow 400ms ease-out;
+  }
+
   .cell-settle {
     animation: cell-settle 260ms ease-out both;
   }
@@ -53,6 +83,12 @@
     background-size: 24px 24px;
     -webkit-mask-image: linear-gradient(to bottom left, #000, transparent 80%);
     mask-image: linear-gradient(to bottom left, #000, transparent 80%);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
   }
 }
 
