@@ -22,7 +22,8 @@ test('personal gmail sees the denied screen with a switch button', async ({ brow
 
 test('gcaa colleague sees the follower view', async ({ browser, baseURL }) => {
   const { context, page } = await openAs(browser, baseURL, 'a@gcaa.org.tw', '#/');
-  await expect(page.getByText('等待主持人開始')).toBeVisible();
+  await expect(page).toHaveURL(/#\/s\/0$/);
+  await expect(page.getByRole('heading', { level: 1, name: '開場' })).toBeVisible();
   await context.close();
 });
 

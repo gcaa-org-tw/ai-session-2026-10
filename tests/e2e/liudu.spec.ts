@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Locator, Page } from '@playwright/test';
+import type { Browser, BrowserContext, Locator, Page } from '@playwright/test';
 import { copy } from '../../src/content/copy';
 import { openAs, PRESENTER, resetEmulators, seedSession, SLIDE } from './helpers';
 
@@ -16,6 +16,15 @@ async function box(locator: Locator): Promise<{ x: number; y: number; width: num
   return b;
 }
 
+async function openLiudu(browser: Browser, baseURL: string | undefined): Promise<{ context: BrowserContext; page: Page }> {
+  const { context, page } = await openAs(browser, baseURL, ALICE, '#/s/0');
+  await stubSite(page, []);
+  await page.evaluate(() => {
+    window.location.hash = '#/s/6/liudu';
+  });
+  return { context, page };
+}
+
 async function stubSite(page: Page, hits: string[]): Promise<void> {
   await page.route(SITE_PATTERN, async (route) => {
     hits.push(route.request().url());
@@ -24,10 +33,7 @@ async function stubSite(page: Page, hits: string[]): Promise<void> {
 }
 
 test('follower sees the static image next to the interactive site', async ({ browser, baseURL }) => {
-  await seedSession(SLIDE.scenario);
-  const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
-  await stubSite(page, []);
-  await seedSession(SLIDE.liudu);
+  const { context, page } = await openLiudu(browser, baseURL);
 
   const image = page.getByRole('img', { name: copy.liudu.imageAlt });
   await expect(image).toBeVisible();
@@ -54,10 +60,7 @@ test('follower sees the static image next to the interactive site', async ({ bro
 });
 
 test('panels sit side by side on a wide window and stack on a narrow one', async ({ browser, baseURL }) => {
-  await seedSession(SLIDE.scenario);
-  const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
-  await stubSite(page, []);
-  await seedSession(SLIDE.liudu);
+  const { context, page } = await openLiudu(browser, baseURL);
   const image = page.getByRole('img', { name: copy.liudu.imageAlt });
   const frame = page.locator('iframe');
   await expect(frame).toBeVisible();
@@ -75,11 +78,8 @@ test('panels sit side by side on a wide window and stack on a narrow one', async
 });
 
 test('no horizontal scroll at 640 px', async ({ browser, baseURL }) => {
-  await seedSession(SLIDE.scenario);
-  const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
-  await stubSite(page, []);
+  const { context, page } = await openLiudu(browser, baseURL);
   await page.setViewportSize({ width: 640, height: 800 });
-  await seedSession(SLIDE.liudu);
   await expect(page.locator('iframe')).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
@@ -87,11 +87,12 @@ test('no horizontal scroll at 640 px', async ({ browser, baseURL }) => {
 });
 
 test('a failed image shows its alt text in a box', async ({ browser, baseURL }) => {
-  await seedSession(SLIDE.scenario);
-  const { context, page } = await openAs(browser, baseURL, ALICE, '#/');
+  const { context, page } = await openAs(browser, baseURL, ALICE, '#/s/0');
   await stubSite(page, []);
   await page.route('**/liudu-static.png', (route) => route.abort());
-  await seedSession(SLIDE.liudu);
+  await page.evaluate(() => {
+    window.location.hash = '#/s/6/liudu';
+  });
   await expect(page.getByTestId('liudu-image-error')).toHaveText(copy.liudu.imageAlt);
   await expect(page.getByRole('img', { name: copy.liudu.imageAlt })).toHaveCount(0);
   await context.close();

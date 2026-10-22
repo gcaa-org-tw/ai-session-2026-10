@@ -26,6 +26,14 @@ test.beforeEach(async () => {
   await seedRaceContent();
 });
 
+function kitButton(page: Page, block: 'race' | 'folder-rules') {
+  return page.locator(`#block-${block}`).getByRole('button', { name: '下載練習包' });
+}
+
+function kitError(page: Page, block: 'race' | 'folder-rules') {
+  return page.locator(`#block-${block}`).getByTestId('kit-error');
+}
+
 function sentence(page: Page, id: string) {
   return page.getByTestId(`race-sentence-${id}`);
 }
@@ -257,7 +265,7 @@ test('an entry without a role is not counted for either role', async ({ browser,
 test('kit download builds 練習包.zip from the stored kit', async ({ browser, baseURL }) => {
   await seedSession(SLIDE.race);
   const a = await openAs(browser, baseURL, ALICE, '#/');
-  const button = a.page.getByRole('button', { name: '下載練習包' });
+  const button = kitButton(a.page, 'race');
   await expect(button).toBeEnabled();
   const [download] = await Promise.all([a.page.waitForEvent('download'), button.click()]);
   expect(download.suggestedFilename()).toBe('練習包.zip');
@@ -276,7 +284,7 @@ test('the folder-rules slide offers the same kit download', async ({ browser, ba
   await seedSession(SLIDE.folderRules);
   const a = await openAs(browser, baseURL, ALICE, '#/');
   await expect(a.page.locator('[data-slide-id="folder-rules"]')).toBeVisible();
-  const button = a.page.getByRole('button', { name: '下載練習包' });
+  const button = kitButton(a.page, 'folder-rules');
   await expect(button).toBeEnabled();
   const [download] = await Promise.all([a.page.waitForEvent('download'), button.click()]);
   expect(download.suggestedFilename()).toBe('練習包.zip');
@@ -290,8 +298,8 @@ test('the folder-rules slide shows the missing-kit error and a disabled button',
   await resetEmulators();
   await seedSession(SLIDE.folderRules);
   const a = await openAs(browser, baseURL, ALICE, '#/');
-  await expect(a.page.getByRole('button', { name: '下載練習包' })).toBeDisabled();
-  await expect(a.page.getByTestId('kit-error')).toBeVisible();
+  await expect(kitButton(a.page, 'folder-rules')).toBeDisabled();
+  await expect(kitError(a.page, 'folder-rules')).toBeVisible();
   await a.context.close();
 });
 
@@ -310,8 +318,8 @@ test('missing kit disables the download and shows the error', async ({ browser, 
   await seedSession(SLIDE.race);
   const a = await openAs(browser, baseURL, ALICE, '#/');
   await expect(sentence(a.page, 's1')).toBeVisible();
-  await expect(a.page.getByRole('button', { name: '下載練習包' })).toBeDisabled();
-  await expect(a.page.getByTestId('kit-error')).toBeVisible();
+  await expect(kitButton(a.page, 'race')).toBeDisabled();
+  await expect(kitError(a.page, 'race')).toBeVisible();
   await a.context.close();
 });
 
