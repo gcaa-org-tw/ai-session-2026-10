@@ -161,7 +161,7 @@ function PresenterConsole() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-t border-grid bg-paper px-4 py-3">
           <button type="button" className={navButton} disabled={writing || index === 0} onClick={() => void go(index - 1)}>
             上一張
           </button>

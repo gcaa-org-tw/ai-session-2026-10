@@ -82,7 +82,7 @@ function SectionFrame({ section, slideId, session, presenterIndex, follow, onFol
         {wide && pill}
       </aside>
       <TocSheet open={tocOpen} onClose={closeToc} opener={opener} section={section} activeId={activeId} />
-      <main className="min-w-0 flex-1 px-4 pb-40 pt-8 sm:px-8 lg:px-12 lg:pt-14">
+      <main className="min-w-0 flex-1 px-4 pb-16 pt-8 sm:px-8 lg:px-12 lg:pt-14">
         <SectionPage section={section} slideId={slideId} />
       </main>
     </div>
