@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { copy } from '../content/copy';
 import { useAllEntries, useMyEntry } from '../entries/useEntries';
-import { aggregateWarmup } from '../lib/scoring';
+import { aggregateWarmup, toggleChoice } from '../lib/scoring';
 import type { WarmMark, WarmupEntry } from '../lib/types';
 import { useDraft } from './hooks';
 import { BoardFrame, buttonBase, LoadFailure, LoadingBlock, optionButton, SaveStatus, wrapText } from './ui';
@@ -93,7 +93,7 @@ export default function Warmup() {
                     aria-pressed={selected}
                     disabled={busy}
                     className={`${buttonBase} ${optionButton(selected)}`}
-                    onClick={() => draft.change({ ...current, marks: { ...current.marks, [t.id]: m } }, true)}
+                    onClick={() => draft.change({ ...current, marks: toggleChoice(current.marks, t.id, m) }, true)}
                   >
                     {copy.warmMarks[m]}
                   </button>

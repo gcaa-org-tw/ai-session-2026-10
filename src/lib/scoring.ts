@@ -13,6 +13,11 @@ import type {
   WishItem,
 } from './types';
 
+export function toggleChoice<T extends string>(choices: Record<string, T>, id: string, value: T): Record<string, T> {
+  if (choices[id] !== value) return { ...choices, [id]: value };
+  return Object.fromEntries(Object.entries(choices).filter(([key]) => key !== id));
+}
+
 export function aggregateWarmup(entries: WarmupEntry[], typeIds: string[]): Record<string, Record<WarmMark, number>> {
   const result: Record<string, Record<WarmMark, number>> = {};
   for (const id of typeIds) {

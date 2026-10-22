@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { aggregateHabits, aggregateRace, aggregateWarmup, scoreFindings, triageBin } from '../../src/lib/scoring';
+import { aggregateHabits, aggregateRace, aggregateWarmup, scoreFindings, toggleChoice, triageBin } from '../../src/lib/scoring';
 import type { AnswerKey, HabitsEntry, RaceEntry, WarmupEntry } from '../../src/lib/types';
 
 describe('triageBin', () => {
@@ -102,6 +102,12 @@ describe('aggregateHabits', () => {
   test('ignores placements for unknown cards', () => {
     expect(Object.keys(aggregateHabits(entries, ['c1']))).toEqual(['c1']);
   });
+  test('a cleared card is not counted, and an emptied entry counts nothing', () => {
+    const cleared: HabitsEntry[] = [{ placements: { c2: 'useful' } }, { placements: {} }];
+    const result = aggregateHabits(cleared, ['c1', 'c2']);
+    expect(result.c1).toEqual({ outdated: 0, useful: 0, new: 0 });
+    expect(result.c2).toEqual({ outdated: 0, useful: 1, new: 0 });
+  });
 });
 
 describe('aggregateWarmup', () => {
@@ -120,5 +126,33 @@ describe('aggregateWarmup', () => {
     const result = aggregateWarmup(entries, ['t1', 't2']);
     expect(result.t1).toEqual({ using: 2, worse: 1, none: 0 });
     expect(result.t2).toEqual({ using: 0, worse: 0, none: 1 });
+  });
+  test('a cleared type is not counted, and an emptied entry counts nothing', () => {
+    const entries: WarmupEntry[] = [
+      { marks: { t2: 'none' }, note: '' },
+      { marks: {}, note: 'only a note' },
+    ];
+    const result = aggregateWarmup(entries, ['t1', 't2']);
+    expect(result.t1).toEqual({ using: 0, worse: 0, none: 0 });
+    expect(result.t2).toEqual({ using: 0, worse: 0, none: 1 });
+  });
+});
+
+describe('toggleChoice', () => {
+  test('sets a missing key', () => {
+    expect(toggleChoice<'a' | 'b'>({}, 'x', 'a')).toEqual({ x: 'a' });
+  });
+  test('replaces a different value', () => {
+    expect(toggleChoice<'a' | 'b'>({ x: 'a' }, 'x', 'b')).toEqual({ x: 'b' });
+  });
+  test('removes the key when the same value is chosen again, leaving others', () => {
+    const next = toggleChoice<'a' | 'b'>({ x: 'a', y: 'b' }, 'x', 'a');
+    expect(next).toEqual({ y: 'b' });
+    expect('x' in next).toBe(false);
+  });
+  test('does not mutate its input', () => {
+    const input: Record<string, 'a'> = { x: 'a' };
+    toggleChoice(input, 'x', 'a');
+    expect(input).toEqual({ x: 'a' });
   });
 });

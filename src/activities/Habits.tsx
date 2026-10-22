@@ -4,7 +4,7 @@ import { copy } from '../content/copy';
 import type { HabitCard } from '../content/copy';
 import { ui } from '../content/ui';
 import { useAllEntries, useMyEntry } from '../entries/useEntries';
-import { aggregateHabits } from '../lib/scoring';
+import { aggregateHabits, toggleChoice } from '../lib/scoring';
 import type { Bin, HabitsEntry } from '../lib/types';
 import { setRevealed, useLiveSession } from '../session/useLiveSession';
 import type { ActivityProps } from './types';
@@ -131,7 +131,7 @@ export default function Habits({ isPresenter }: ActivityProps) {
   const revealed = session.state?.revealed.habits === true;
 
   function place(cardId: string, bin: Bin) {
-    void save({ placements: { ...(value?.placements ?? {}), [cardId]: bin } });
+    void save({ placements: toggleChoice(value?.placements ?? {}, cardId, bin) });
   }
 
   return (

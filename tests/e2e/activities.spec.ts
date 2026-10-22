@@ -72,6 +72,46 @@ test('two users place habit cards, presenter reveals, both see the room split an
   await presenter.context.close();
 });
 
+test('tapping the selected habit bin again clears that card only, and the room split drops it', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.habits, ['habits']);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  await place(a.page, 'h1', '過時');
+  await place(a.page, 'h7', '仍然有用');
+  const outdated = habit(a.page, 'h1').getByRole('button', { name: '過時', exact: true });
+  await expect(outdated).toHaveAttribute('aria-pressed', 'true');
+  await expect(habit(a.page, 'h1').getByTestId('split-outdated')).toContainText('1');
+
+  await outdated.click();
+  await expect(outdated).toHaveAttribute('aria-pressed', 'false');
+  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
+  const uid = (await adminListIds('entries/habits/users'))[0] ?? '';
+  await expect.poll(async () => (await adminGetDoc(`entries/habits/users/${uid}`))?.placements).toEqual({ h7: 'useful' });
+  await expect(habit(a.page, 'h1').getByTestId('split-outdated')).toContainText('0');
+  await expect(habit(a.page, 'h7').getByTestId('split-useful')).toContainText('1');
+
+  await a.page.reload();
+  await expect(habit(a.page, 'h1').getByRole('button', { name: '過時', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  await expect(habit(a.page, 'h7').getByRole('button', { name: '仍然有用', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await a.context.close();
+});
+
+test('tapping the selected warm-up mark again clears it from the stored marks and the tally', async ({ browser, baseURL }) => {
+  await seedSession(SLIDE.warmup);
+  const a = await openAs(browser, baseURL, ALICE, '#/');
+  const row = a.page.getByTestId('warm-row-press');
+  const using = row.getByRole('button', { name: '已經在用 AI' });
+  await using.click();
+  await expect(a.page.getByTestId('tally-press-using')).toHaveText('1');
+  await expect(a.page.getByTestId('save-status')).toHaveText('已儲存');
+
+  await using.click();
+  await expect(using).toHaveAttribute('aria-pressed', 'false');
+  const uid = (await adminListIds('entries/warmup/users'))[0] ?? '';
+  await expect.poll(async () => (await adminGetDoc(`entries/warmup/users/${uid}`))?.marks).toEqual({});
+  await expect(a.page.getByTestId('tally-press-using')).toHaveText('0');
+  await a.context.close();
+});
+
 test('presenter reveal control is not shown to participants', async ({ browser, baseURL }) => {
   await seedSession(SLIDE.habits);
   const a = await openAs(browser, baseURL, ALICE, '#/');
